@@ -827,10 +827,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const transferStock = (sourceWhId: number, targetWhId: number, materialCode: string, qty: number, reason: string): boolean => {
     const mat = materials.find(m => m.code === materialCode);
-    if (!mat || mat.qtyOnHand < qty) return false;
-
     const sourceWh = warehouses.find(w => w.id === sourceWhId);
     const targetWh = warehouses.find(w => w.id === targetWhId);
+    if (!Number.isFinite(qty) || qty <= 0 || !mat || mat.qtyOnHand < qty ||
+      !sourceWh || !targetWh || sourceWhId === targetWhId ||
+      !sourceWh.isActive || !targetWh.isActive) {
+      showToast('Transfer rejected: choose different active warehouses and enter a valid quantity within available stock.');
+      return false;
+    }
 
     const docNo = `TRN-${Date.now().toString().slice(-5)}`;
     const move: StockMovement = {
