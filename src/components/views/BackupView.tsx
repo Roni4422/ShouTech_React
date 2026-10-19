@@ -182,7 +182,7 @@ export const BackupView: React.FC = () => {
           <div className="p-3 bg-[#1F1F1F] border-b border-[#383838] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <Database className="w-4 h-4 text-cyan-400" />
-              <span className="font-bold text-white">سجل النسخ الاحتياطية المتاحة للاستعادة ({companyBackups.length})</span>
+              <span className="font-bold text-white">سجل لقطات الجلسة الحالية ({companyBackups.length})</span>
             </div>
             <span className="text-[11px] text-gray-400 font-mono">
               لا يوجد خادم سحابي متصل
@@ -234,7 +234,7 @@ export const BackupView: React.FC = () => {
                     </td>
                     <td className="p-2.5 text-center font-mono text-gray-300 font-bold">{b.size}</td>
                     <td className="p-2.5 text-center">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] flex items-center justify-center gap-1 mx-auto w-fit">
+                      <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px] flex items-center justify-center gap-1 mx-auto w-fit">
                         <CheckCircle2 className="w-3 h-3" />
                         <span>لم تُفحص</span>
                       </span>
@@ -283,7 +283,7 @@ export const BackupView: React.FC = () => {
             className="px-6 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold flex items-center gap-1 shadow"
           >
             <Check className="w-3.5 h-3.5" />
-            <span>موافق (حفظ لقطة OK)</span>
+            <span>تنزيل لقطة JSON</span>
           </button>
         </div>
       </div>
