@@ -524,37 +524,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const showSplash = appStage === 'splash';
   const setShowSplash = (show: boolean) => setAppStage(show ? 'splash' : 'main');
 
+  // Fail closed until a trusted server-side authentication provider is configured.
+  // The current browser-only user cache has no password verifier and cannot enforce identity securely.
   const login = (username: string): boolean => {
-    if (securityStatus.lockoutActive) {
-      showToast('Security Lockout Active: Too many failed login attempts.');
-      return false;
-    }
-
     const normalizedUsername = username.trim().toLocaleLowerCase();
-    const found = users.find(u => u.username.trim().toLocaleLowerCase() === normalizedUsername);
-    if (found && found.active) {
-      setCurrentUser(found);
-      setIsLoggedIn(true);
-      setSecurityStatus(prev => ({ ...prev, failedLoginAttempts: 0 }));
-      recordAuditEvent('SECURITY_AUTH_SUCCESS', 'SecurityGuard', found.username);
-      setAppStage('main');
-      showToast(`${translate('login.welcome')} ${found.fullName}`);
-      return true;
-    }
-
-    // Handle failed login attempt
-    const attempts = securityStatus.failedLoginAttempts + 1;
-    const isLocked = attempts >= securityStatus.maxAttempts;
-    setSecurityStatus(prev => ({
-      ...prev,
-      failedLoginAttempts: attempts,
-      lockoutActive: isLocked
-    }));
-    recordAuditEvent('SECURITY_AUTH_FAILED', 'SecurityGuard', username);
-
-    if (isLocked) {
-      showToast('2026 Sentinel Alert: Account locked due to 5 consecutive failed attempts.');
-    }
+    recordAuditEvent('SECURITY_AUTH_UNAVAILABLE', 'SecurityGuard', normalizedUsername || 'empty-username');
+    showToast('Sign-in unavailable: trusted server-side authentication is not configured.');
     return false;
   };
 
