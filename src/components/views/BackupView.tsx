@@ -154,12 +154,7 @@ export const BackupView: React.FC = () => {
 
             <div>
               <label className="block text-[11px] text-gray-400 mb-1">وجهة ومكان التخزين</label>
-              <select
-                value={targetLocation}
-                className="w-full bg-[#1A1A1A] border border-[#444] rounded px-3 py-1.5 text-xs text-white font-medium"
-              >
-                <option value="local">تنزيل ملف JSON عبر المتصفح (غير مشفّر)</option>
-              </select>
+              <div className="w-full bg-[#1A1A1A] border border-[#444] rounded px-3 py-2 text-xs text-gray-300">تنزيل ملف JSON عبر المتصفح (غير مشفّر)</div>
             </div>
 
             <div className="flex items-end gap-2">
