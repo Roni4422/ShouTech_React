@@ -1,14 +1,14 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  Save, Printer, Search, Moon, Sun, Globe, Building2, UserCircle, LogOut 
+  Printer, Moon, Sun, Globe, Building2, UserCircle, LogOut 
 } from 'lucide-react';
 import { LanguageCode } from '../types';
 
 export const QuickToolbar: React.FC = () => {
   const { 
     theme, setTheme, language, setLanguage, currentCompany, currentUser, 
-    setShowCompanySelect, setShowLoginModal, logout, translate, showToast,
+    setShowCompanySelect, setShowLoginModal, logout, translate,
     openPreview, activeWindow 
   } = useApp();
 
@@ -53,13 +53,7 @@ export const QuickToolbar: React.FC = () => {
           <span className="text-[10px] px-1 bg-white/10 rounded text-gray-400 font-mono">10.6.0</span>
         </div>
 
-        <button 
-          onClick={() => showToast(translate('common.save'))}
-          className="p-1.5 hover:bg-white/10 rounded text-gray-300 hover:text-white transition-colors"
-          title={translate('common.save')}
-        >
-          <Save className="w-3.5 h-3.5 text-blue-400" />
-        </button>
+/button>
 
         <button 
           onClick={() => openPreview(`معاينة مستند: ${activeWindow}`, activeWindow)}
@@ -70,13 +64,7 @@ export const QuickToolbar: React.FC = () => {
           <span className="text-[10px] font-bold hidden sm:inline">معاينة وورد</span>
         </button>
 
-        <button 
-          onClick={() => showToast(translate('common.search'))}
-          className="p-1.5 hover:bg-white/10 rounded text-gray-300 hover:text-white transition-colors"
-          title={translate('common.search')}
-        >
-          <Search className="w-3.5 h-3.5" />
-        </button>
+/button>
       </div>
 
       {/* Right controls: Company, User, Lang, Theme */}
