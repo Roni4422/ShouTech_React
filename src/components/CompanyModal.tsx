@@ -22,13 +22,13 @@ export const CompanyModal: React.FC = () => {
   const [newNameAr, setNewNameAr] = useState('');
   const [newNameEn, setNewNameEn] = useState('');
   const [selectedTreeId, setSelectedTreeId] = useState<string>('sa_zatca');
-  const [newTaxId, setNewTaxId] = useState('300' + Math.floor(100000000 + Math.random() * 900000000) + '00003');
-  const [newVat, setNewVat] = useState('VAT-' + Math.floor(100000000 + Math.random() * 900000000));
-  const [newCity, setNewCity] = useState('الرياض / دمشق / دبي');
+  const [newTaxId, setNewTaxId] = useState('');
+  const [newVat, setNewVat] = useState('');
+  const [newCity, setNewCity] = useState('');
 
   // Backup location preferences for the new company
   const [backupLocationType, setBackupLocationType] = useState<'local_appdata' | 'custom'>('local_appdata');
-  const [customBackupPath, setCustomBackupPath] = useState('D:\\ShouTech_ERP_Backups\\COMP_VAULT\\');
+  const [customBackupPath, setCustomBackupPath] = useState('');
   const [autoCloudBackup, setAutoCloudBackup] = useState(true);
 
   const selectedTree = ACCOUNTING_TREES.find(t => t.id === selectedTreeId) || ACCOUNTING_TREES[0];
@@ -45,8 +45,17 @@ export const CompanyModal: React.FC = () => {
 
   const handleRegisterCompany = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNameAr) {
-      showToast('اسم الشركة بالعربية مطلوب');
+    const normalizedCode = newCode.trim().toLocaleUpperCase();
+    if (!normalizedCode || !newNameAr.trim()) {
+      showToast('رمز الشركة واسمها بالعربية حقول إلزامية');
+      return;
+    }
+    if (companies.some(company => company.code.trim().toLocaleUpperCase() === normalizedCode)) {
+      showToast('رمز الشركة مستخدم بالفعل؛ اختر رمزاً فريداً');
+      return;
+    }
+    if (backupLocationType === 'custom' && !customBackupPath.trim()) {
+      showToast('أدخل مسار النسخ المفضل أو اختر المسار الافتراضي');
       return;
     }
 
@@ -55,15 +64,15 @@ export const CompanyModal: React.FC = () => {
       : customBackupPath;
 
     const created: Omit<Company, 'id'> = {
-      code: newCode,
-      name: newNameAr,
-      nameEn: newNameEn || newNameAr,
-      commercialName: newNameAr,
-      taxId: newTaxId,
-      commercialRegister: `CR-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      vatNumber: newVat,
-      address: newCity,
-      phone: '+966 11 0000000',
+      code: normalizedCode,
+      name: newNameAr.trim(),
+      nameEn: newNameEn.trim() || newNameAr.trim(),
+      commercialName: newNameAr.trim(),
+      taxId: newTaxId.trim(),
+      commercialRegister: '',
+      vatNumber: newVat.trim(),
+      address: newCity.trim(),
+      phone: '',
       currency: selectedTree.currency,
       database: `SQLite (${newCode}_${selectedTree.code}.db)`,
       isDefault: false,
@@ -76,7 +85,7 @@ export const CompanyModal: React.FC = () => {
 
     addCompany(created);
     setShowAddCompany(false);
-    showToast(`تم تأسيس الشركة وتخصيص مسار النسخ الاحتياطي: ${newNameAr} (${chosenBackupLoc})`);
+    showToast(`تم حفظ سجل الشركة محلياً: ${newNameAr.trim()}. لم تُنشأ قاعدة بيانات فعلية ولم يُفعّل النسخ السحابي.`);
   };
 
   return (
@@ -209,7 +218,7 @@ export const CompanyModal: React.FC = () => {
               <div className="p-3 bg-[#131313] rounded-lg border border-blue-500/30 space-y-2.5">
                 <label className="block text-[11px] font-bold text-blue-300 flex items-center gap-1.5">
                   <HardDrive className="w-3.5 h-3.5 text-blue-400" />
-                  <span>تخصيص مكان حفظ النسخ الاحتياطية وإعدادات الخادم السحابي:</span>
+                  <span>تفضيلات مسار النسخ الاحتياطي (لا تنشئ نسخة فعلية):</span>
                 </label>
 
                 <div className="space-y-2">
@@ -222,7 +231,7 @@ export const CompanyModal: React.FC = () => {
                       className="text-blue-600 focus:ring-0"
                     />
                     <span className="text-gray-200">
-                      مكان النسخ الاحتياطي في <strong className="text-cyan-400 font-mono">%LocalAppData%\ShouTech\Backups</strong> مع تفضيلات المستخدم وقاعدة البيانات
+                      مكان النسخ الاحتياطي في <strong className="text-cyan-400 font-mono">%LocalAppData%\ShouTech\Backups</strong> (لم يتم التحقق من وجوده أو الكتابة إليه)
                     </span>
                   </label>
 
@@ -235,7 +244,7 @@ export const CompanyModal: React.FC = () => {
                       className="text-blue-600 focus:ring-0"
                     />
                     <span className="text-gray-200">
-                      اختيار مكان آخر لحفظ النسخ الاحتياطي (مسار مخصص أو قرص صلب خارجي / شبكة NAS)
+                      تحديد مسار مفضل فقط (لا يتم إنشاء مجلد أو التحقق من الصلاحيات حالياً)
                     </span>
                   </label>
 
@@ -262,10 +271,10 @@ export const CompanyModal: React.FC = () => {
                       />
                       <span className="text-emerald-400 font-bold flex items-center gap-1">
                         <Cloud className="w-3.5 h-3.5" />
-                        <span>نسخ احتياطي يومي تلقائي للخادم بالخلفية (بحد أقصى 3 نسخ سحابية دوارة)</span>
+                        <span>تفضيل النسخ السحابي مستقبلاً (الخدمة غير متصلة حالياً)</span>
                       </span>
                     </label>
-                    <span className="text-gray-400 text-[10px] font-mono">تشفير عسكري AES-256</span>
+                    <span className="text-gray-400 text-[10px] font-mono">لم يتم تفعيل التشفير أو خدمة سحابية</span>
                   </div>
                 </div>
               </div>
@@ -331,7 +340,7 @@ export const CompanyModal: React.FC = () => {
 
                     <div className="text-[11px] text-gray-400 flex items-center justify-between pt-1 border-t border-white/5 font-mono">
                       <span>مسار النسخ: {comp.backupLocation || '%LocalAppData%\\ShouTech\\Backups'}</span>
-                      <span className="text-emerald-400 font-bold">خادم النسخ: جاهز ومفعل (3 نسخ)</span>
+                      <span className="text-emerald-400 font-bold">خدمة النسخ: غير متصلة</span>
                     </div>
                   </div>
 
