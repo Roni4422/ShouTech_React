@@ -10,6 +10,7 @@ import {
   INITIAL_BACKUPS, INITIAL_PARTIES, INITIAL_COST_CENTERS, INITIAL_CHEQUES, INITIAL_AUDIT_LOGS 
 } from '../data/initialData';
 import { t } from '../i18n';
+import { apiClient } from '../services/apiClient';
 
 interface AppContextType {
   // App lifecycle stages: Splash -> Company Selection -> Login -> Main Window
@@ -51,7 +52,7 @@ interface AppContextType {
   currentCompany: Company;
   setCurrentCompany: (comp: Company) => void;
   isLoggedIn: boolean;
-  login: (username: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   
   // 2026 Security Engine & Integrity Status
@@ -62,6 +63,7 @@ interface AppContextType {
 
   // Data
   companies: Company[];
+  refreshCompanies: () => Promise<Company[]>;
   addCompany: (comp: Omit<Company, 'id'>) => void;
   users: User[];
   materials: Material[];
@@ -356,6 +358,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsPreviewOpen(false);
   };
 
+  const refreshCompanies = async (): Promise<Company[]> => {
+    try {
+      const remoteCompanies = await apiClient.listCompanies();
+      const mapped: Company[] = remoteCompanies.map(company => ({
+        id: company.companyId,
+        code: company.code,
+        name: company.name,
+        nameEn: company.nameEn,
+        commercialName: company.nameEn,
+        taxId: '',
+        commercialRegister: company.commercialRegistration,
+        vatNumber: '',
+        address: company.address,
+        phone: company.phone,
+        currency: company.currency,
+        database: 'Server-managed database',
+        isDefault: false
+      }));
+      setCompanies(mapped);
+      setCurrentCompany(current => mapped.find(company => company.id === current.id) ?? EMPTY_COMPANY);
+      return mapped;
+    } catch {
+      setCompanies([]);
+      setCurrentCompany(EMPTY_COMPANY);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    void refreshCompanies();
+  }, []);
+
   // Sync to local storage
   useEffect(() => {
     localStorage.setItem('shoutech_lang', language);
@@ -371,10 +405,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       document.documentElement.classList.remove('theme-light');
     }
   }, [theme]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_companies', JSON.stringify(companies));
-  }, [companies]);
 
   useEffect(() => {
     localStorage.setItem('shoutech_materials', JSON.stringify(materials));
@@ -486,11 +516,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Fail closed until a trusted server-side authentication provider is configured.
   // The current browser-only user cache has no password verifier and cannot enforce identity securely.
-  const login = (username: string): boolean => {
-    const normalizedUsername = username.trim().toLocaleLowerCase();
-    recordAuditEvent('SECURITY_AUTH_UNAVAILABLE', 'SecurityGuard', normalizedUsername || 'empty-username');
-    showToast('Sign-in unavailable: trusted server-side authentication is not configured.');
-    return false;
+  const login = async (username: string, password: string): Promise<boolean> => {
+    if (!currentCompany.id || !password) {
+      showToast('Sign-in failed: select a database-backed company and enter the password.');
+      return false;
+    }
+    try {
+      const session = await apiClient.login(username.trim(), password, currentCompany.id);
+      const role: UserRole = session.roleCode === 'ROLE_ADMINISTRATOR'
+        ? 'admin'
+        : session.roleCode === 'ROLE_VIEWER' ? 'viewer' : 'user';
+      setCurrentUser({
+        id: session.userId,
+        username: session.username,
+        fullName: session.fullName,
+        fullNameEn: session.fullNameEn,
+        email: session.email,
+        role,
+        active: true,
+        permissions: session.permissions
+      });
+      setIsLoggedIn(true);
+      setAppStage('main');
+      showToast('Signed in successfully through the server.');
+      return true;
+    } catch {
+      showToast('Sign-in failed. Verify the credentials and API/database availability.');
+      return false;
+    }
   };
 
   const resetSecurityLockout = () => {
@@ -498,18 +551,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Security lockout cleared by Administrator.');
   };
 
-  const logout = () => {
-    setIsLoggedIn(false);
-    recordAuditEvent('USER_LOGOUT', 'SecurityGuard', currentUser?.username || 'user');
-    setAppStage('login');
+  const logout = async () => {
+    try {
+      await apiClient.logout();
+      showToast('Signed out from the server.');
+    } catch {
+      apiClient.clearLocalSession();
+      showToast('The server could not confirm sign-out. The local session token was cleared.');
+    } finally {
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+      setAppStage('login');
+    }
   };
 
-  const addCompany = (comp: Omit<Company, 'id'>) => {
-    const newComp: Company = { ...comp, id: `ST-COMP-${Date.now().toString().slice(-3)}` };
-    if (companies.length === 0) setCurrentCompany(newComp);
-    setCompanies(prev => [...prev, newComp]);
-    recordAuditEvent('CREATE_COMPANY', 'MultiCompany', newComp.code);
-    showToast(`Company registered: ${newComp.name}`);
+  const addCompany = (_comp: Omit<Company, 'id'>) => {
+    showToast('Company creation is restricted to the server-backed setup workflow.');
   };
 
   const addMaterial = (mat: Omit<Material, 'id'>) => {
@@ -1001,6 +1058,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         recordAuditEvent,
         resetSecurityLockout,
         companies,
+        refreshCompanies,
         addCompany,
         users,
         materials,
