@@ -85,7 +85,7 @@ const MainShell: React.FC = () => {
   } = useApp();
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#1E1E1E] text-white">
+    <div className="st-shell flex flex-col h-screen w-screen overflow-hidden">
       {/* 1. Windows Classic Menu Bar (UIchart.md) */}
      
 
@@ -99,7 +99,7 @@ const MainShell: React.FC = () => {
       <MdiTabBar />
 
       {/* 5. Active MDI Module Workspace Area */}
-      <main className="flex-1 overflow-hidden relative bg-[#1A1A1A]">
+      <main className="st-workspace flex-1 overflow-hidden relative">
         {windowLayout === 'tabbed' ? (
           // Tabbed Maximized View (Current Active Window)
           <div className="h-full w-full overflow-hidden">
@@ -118,12 +118,10 @@ const MainShell: React.FC = () => {
                 <div
                   key={win.id}
                   onClick={() => focusWindow(win.id)}
-                  className={`flex flex-col rounded-xl overflow-hidden border bg-[#1E1E1E] transition-all shadow-lg ${
-                    isActive ? 'border-[#0078D4] ring-1 ring-[#0078D4]' : 'border-[#383838]'
-                  }`}
+                  className="st-window-panel flex flex-col transition-all shadow-lg" data-active={isActive}
                 >
                   {/* Sub-window title bar */}
-                  <div className="px-3 py-1.5 bg-[#252526] border-b border-[#383838] flex items-center justify-between text-xs select-none">
+                  <div className="st-window-titlebar px-3 py-1.5 flex items-center justify-between text-xs select-none">
                     <span className="font-bold text-gray-200 truncate">{win.title}</span>
                     <button
                       onClick={(e) => {
