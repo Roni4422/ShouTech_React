@@ -28,9 +28,9 @@ app.MapGet("/health/ready", async (IDbConnectionFactory db) =>
         await using var connection = await db.OpenConnectionAsync();
         await connection.QuerySingleAsync<int>("SELECT 1");
         var schemaReady = await db.HasAuthenticationSchemaAsync(connection);
-        return schemaReady
-            ? Results.Ok(new { status = "ready", database = db.ProviderName, schema = "available" })
-            : Results.Json(new { status = "not_ready", reason = "Authentication schema is missing. Apply the documented database migrations." }, statusCode: StatusCodes.Status503ServiceUnavailable);
+        if (!schemaReady)
+            return Results.Json(new { status = "not_ready", reason = "Authentication schema is missing. Apply the documented database migrations." }, statusCode: StatusCodes.Status503ServiceUnavailable);
+        return Results.Ok(new { status = "ready", database = db.ProviderName, schema = "available" });
     }
     catch
     {
