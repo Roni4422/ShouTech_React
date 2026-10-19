@@ -694,50 +694,7 @@ export const INITIAL_MOVEMENTS: StockMovement[] = [
   }
 ];
 
-export const INITIAL_BACKUPS: BackupRecord[] = [
-  {
-    id: 'bkp-20261019-0800',
-    name: 'STBK2_CLOUD_MIRROR_20261019_080000.stbk2',
-    date: '2026-10-19 08:00:00',
-    size: '15.4 MB',
-    status: 'Valid',
-    note: 'نسخة سحابية مرآة عند بداية العمل باليوم الجديد (1/3)',
-    type: 'MIRROR_FULL',
-    storageTarget: 'cloud_vault',
-    companyCode: '001',
-    triggerEvent: 'session_start',
-    encryptionAlgorithm: 'AES-256-GCM / Argon2id (Military FIPS 140-3)',
-    sha256Checksum: 'a7c9381f802f012bceaa087612c6a85e8d35661b1e9cfa4d920516ccfa307e2d'
-  },
-  {
-    id: 'bkp-20261018-1800',
-    name: 'STBK2_CLOUD_MIRROR_20261018_180000.stbk2',
-    date: '2026-10-18 18:00:00',
-    size: '15.2 MB',
-    status: 'Valid',
-    note: 'نسخة سحابية مرآة تلقائية عند نهاية العمل والإغلاق (2/3)',
-    type: 'MIRROR_FULL',
-    storageTarget: 'cloud_vault',
-    companyCode: '001',
-    triggerEvent: 'session_end',
-    encryptionAlgorithm: 'AES-256-GCM / Argon2id (Military FIPS 140-3)',
-    sha256Checksum: '3b09f48501188d302a819fc770281b379e4f1a25c602de7187449c25f1903e1a'
-  },
-  {
-    id: 'bkp-20261017-1800',
-    name: 'STBK2_CLOUD_MIRROR_20261017_180000.stbk2',
-    date: '2026-10-17 18:00:00',
-    size: '14.9 MB',
-    status: 'Valid',
-    note: 'نسخة سحابية مرآة سابقة بالأرشيف السحابي (3/3)',
-    type: 'MIRROR_FULL',
-    storageTarget: 'cloud_vault',
-    companyCode: '001',
-    triggerEvent: 'session_end',
-    encryptionAlgorithm: 'AES-256-GCM / Argon2id (Military FIPS 140-3)',
-    sha256Checksum: '9e8a7c2b4f1e0d3a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a'
-  }
-];
+export const INITIAL_BACKUPS: BackupRecord[] = [];
 
 export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
   {
