@@ -755,8 +755,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const syncCloudBackups = () => {
-    recordAuditEvent('SYNC_CLOUD_BACKUPS', 'CloudVault', currentCompany.code);
-    showToast('تمت مزامنة النسخ الاحتياطية بنجاح مع خادم التراخيص السحابي [Cloud Vault Sync OK]');
+    showToast('Cloud backup is unavailable: no cloud storage service is configured. No data was uploaded.');
   };
 
   const createBackup = (
@@ -814,7 +813,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const bkp = backups.find(b => b.id === id);
     if (!bkp) return false;
 
-    // Full 100% Mirror Re-hydration
+    // Restore an in-memory snapshot from this running session only.
     if (bkp.snapshotData) {
       const snap = bkp.snapshotData;
       if (snap.company) setCurrentCompany(snap.company);
@@ -836,8 +835,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (snap.currentUser) setCurrentUser(snap.currentUser);
     }
 
-    recordAuditEvent('RESTORE_FULL_MIRROR_SNAPSHOT', 'DisasterRecovery', bkp.name);
-    showToast(`تمت استعادة النسخة الاحتياطية المرآة بنجاح: ${bkp.name}، وفتح البرنامج بكامل بيانات الشركة وتفضيلات المستخدمين!`);
+    recordAuditEvent('RESTORE_SESSION_SNAPSHOT', 'Backup', bkp.name);
+    showToast(`Session snapshot restored in memory: ${bkp.name}. This does not restore an exported file or persist changes to a database.`);
     return true;
   };
 
