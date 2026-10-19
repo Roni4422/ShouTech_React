@@ -53,6 +53,7 @@ function renderWindowView(type: ActiveWindow) {
     case 'cheques': return <ChequesView />;
     case 'closingAccounts': return <ClosingAccountsView />;
     case 'financialAnalysis': return <FinancialAnalysisView />;
+    case 'aiEnterprise': return <FinancialAnalysisView />;
     case 'orders': return <OrdersView />;
     case 'crm': return <CRMView />;
     case 'salesReps': return <SalesRepsView />;
