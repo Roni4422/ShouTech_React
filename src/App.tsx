@@ -22,6 +22,9 @@ import { BackupView } from './components/views/BackupView';
 import { SettingsView } from './components/views/SettingsView';
 import { UsersView } from './components/views/UsersView';
 import { AboutView } from './components/views/AboutView';
+import { AIEnterpriseView } from './components/views/AIEnterpriseView';
+import { DataExchangeView } from './components/views/DataExchangeView';
+import { LicenseView } from './components/views/LicenseView';
 import { NativeEngineView } from './components/views/NativeEngineView';
 import { SecurityCenterView } from './components/views/SecurityCenterView';
 import { ClosingAccountsView } from './components/views/ClosingAccountsView';
@@ -53,7 +56,7 @@ function renderWindowView(type: ActiveWindow) {
     case 'cheques': return <ChequesView />;
     case 'closingAccounts': return <ClosingAccountsView />;
     case 'financialAnalysis': return <FinancialAnalysisView />;
-    case 'aiEnterprise': return <FinancialAnalysisView />;
+    case 'aiEnterprise': return <AIEnterpriseView />;
     case 'orders': return <OrdersView />;
     case 'crm': return <CRMView />;
     case 'salesReps': return <SalesRepsView />;
@@ -64,15 +67,13 @@ function renderWindowView(type: ActiveWindow) {
     case 'tools': return <ToolsView />;
     case 'enterpriseOptions': return <EnterpriseToolsOptionsView />;
     case 'delivery': return <DeliveryView />;
-    case 'backup':
-    case 'dataExchange':
-      return <BackupView />;
+    case 'backup': return <BackupView />;
+    case 'dataExchange': return <DataExchangeView />;
     case 'settings': return <SettingsView />;
     case 'users': return <UsersView />;
     case 'nativeEngine': return <NativeEngineView />;
-    case 'about':
-    case 'license':
-      return <AboutView />;
+    case 'license': return <LicenseView />;
+    case 'about': return <AboutView />;
     default:
       return <DashboardView />;
   }
