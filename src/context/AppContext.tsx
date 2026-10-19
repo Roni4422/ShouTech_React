@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
-  Company, User, Material, Warehouse, Account, Invoice, JournalEntry, 
+  Company, User, UserRole, Material, Warehouse, Account, Invoice, JournalEntry, 
   StockMovement, BackupRecord, LanguageCode, ThemeMode, ActiveWindow, CustomerParty,
   AppStage, CostCenter, ChequeRecord, AuditLogEntry, SecurityStatus, DockedWindow
 } from '../types';
