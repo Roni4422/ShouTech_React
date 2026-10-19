@@ -21,7 +21,7 @@ export const SecurityCenterView: React.FC = () => {
       {/* Top Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#383838]">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 rounded-xl bg-rose-700 flex items-center justify-center shadow-lg">
             <ShieldCheck className="w-7 h-7 text-white" />
           </div>
           <div>
@@ -55,7 +55,7 @@ export const SecurityCenterView: React.FC = () => {
             }`}
           >
             <Hash className="w-3.5 h-3.5" />
-            <span>Immutable Ledger Chain</span>
+            <span>Audit Log (Unverified)</span>
           </button>
           <button
             onClick={() => setActiveTab('rbac')}
@@ -78,7 +78,7 @@ export const SecurityCenterView: React.FC = () => {
                 <span className="font-semibold text-white">Hardware Dongle Status</span>
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
               </div>
-              <div className="text-xl font-bold font-mono text-emerald-400">{securityStatus.dongleId}</div>
+              <div className="text-xl font-bold font-mono text-rose-300">{securityStatus.dongleId}</div>
               <div className="text-[11px] text-gray-400">Firmware: {securityStatus.dongleFirmware}</div>
             </div>
 
@@ -104,8 +104,8 @@ export const SecurityCenterView: React.FC = () => {
           <div className="bg-[#242424] p-5 rounded-xl border border-[#383838] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Lock className="w-4 h-4 text-emerald-400" />
-                <span>Sentinel Cryptographic Handshake Verification</span>
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <span>Hardware integration check (not configured)</span>
               </h3>
               <p className="text-xs text-gray-400 mt-1">
                 No hardware dongle adapter is configured. This control cannot verify hardware or authorize accounting periods.
@@ -144,7 +144,7 @@ export const SecurityCenterView: React.FC = () => {
                   <th className="py-2.5 px-3 text-start">Action</th>
                   <th className="py-2.5 px-3 text-start">Target ID</th>
                   <th className="py-2.5 px-3 text-start">Previous Hash</th>
-                  <th className="py-2.5 px-3 text-start">Current Block Hash</th>
+                  <th className="py-2.5 px-3 text-start">Legacy Digest (Not Secure)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#303030]">
@@ -161,7 +161,7 @@ export const SecurityCenterView: React.FC = () => {
                     <td className="py-2.5 px-3 text-gray-500 truncate max-w-[120px]" title={log.prevHash}>
                       {log.prevHash.slice(0, 16)}...
                     </td>
-                    <td className="py-2.5 px-3 text-emerald-400 font-bold truncate max-w-[140px]" title={log.hash}>
+                    <td className="py-2.5 px-3 text-gray-400 font-bold truncate max-w-[140px]" title={log.hash}>
                       {log.hash.slice(0, 18)}...
                     </td>
                   </tr>
@@ -175,7 +175,7 @@ export const SecurityCenterView: React.FC = () => {
       {/* Tab 3: RBAC Permissions Matrix */}
       {activeTab === 'rbac' && (
         <div className="bg-[#242424] rounded-xl border border-[#383838] p-5 space-y-4">
-          <h3 className="text-sm font-bold text-white mb-2">Role-Based Access Control (RBAC) Entitlements</h3>
+          <h3 className="text-sm font-bold text-white mb-2">Client-side role and permission display (not server-enforced)</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
