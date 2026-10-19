@@ -145,7 +145,20 @@ export const ReportsView: React.FC = () => {
                   return;
                 }
                 if (activeReport === 'trial_balance') {
-                  exportCSV(accounts.map(a => ({ Code: a.code, Name: a.nameAr, NameEn: a.nameEn, Type: a.type, Balance: a.balance })), 'Trial_Balance');
+                  exportCSV([
+                    ...accountBalanceRows.map(({ account, debit, credit }) => ({
+                      RecordType: 'ACCOUNT', Code: account.code, Name: account.nameAr,
+                      NameEn: account.nameEn, Type: account.type, Debit: debit, Credit: credit
+                    })),
+                    {
+                      RecordType: 'DISPLAYED_TOTALS', Code: '', Name: '', NameEn: '', Type: '',
+                      Debit: displayedDebitTotal, Credit: displayedCreditTotal
+                    },
+                    {
+                      RecordType: 'DISPLAYED_DIFFERENCE', Code: '', Name: '', NameEn: '', Type: '',
+                      Debit: displayedDifference, Credit: 0
+                    }
+                  ], 'Account_Balance_Summary');
                 } else if (activeReport === 'stock_balances') {
                   exportCSV(materials.map(m => ({ Code: m.code, Name: m.nameAr, Category: m.category, Unit: m.defaultUnit, Quantity: m.qtyOnHand, Cost: m.cost, RetailPrice: m.priceRetail, TotalValuation: m.qtyOnHand * m.cost })), 'Stock_Balances');
                 } else if (activeReport === 'material_moves') {
