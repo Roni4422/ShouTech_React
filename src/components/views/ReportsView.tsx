@@ -16,19 +16,37 @@ export const ReportsView: React.FC = () => {
   const [fromDate, setFromDate] = useState('2026-01-01');
   const [toDate, setToDate] = useState('2026-12-31');
 
-  const exportCSV = (data: any[], filename: string) => {
-    if (data.length === 0) return;
-    const headers = Object.keys(data[0]).join(',');
-    const rows = data.map(obj => Object.values(obj).map(val => `"${val}"`).join(','));
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
+  const exportCSV = (data: Array<Record<string, string | number | boolean | null | undefined>>, filename: string) => {
+    if (data.length === 0) {
+      showToast('Export unavailable: this report contains no rows.');
+      return;
+    }
+
+    const columns = Object.keys(data[0]);
+    const escapeCell = (value: string | number | boolean | null | undefined): string => {
+      const raw = value == null ? '' : String(value);
+      const formulaSafe = /^[\s]*[=+@-]/.test(raw) ? "'" + raw : raw;
+      return '"' + formulaSafe.replace(/"/g, '""') + '"';
+    };
+    const csv = [columns, ...data.map(row => columns.map(column => row[column]))]
+      .map(row => row.map(escapeCell).join(','))
+      .join('\r\n');
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `${filename}.csv`);
+    link.href = url;
+    link.download = filename + '.csv';
+    link.style.display = 'none';
     document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast(`Exported ${filename}.csv`);
+    try {
+      link.click();
+      showToast('CSV download requested: ' + filename + '.csv');
+    } catch {
+      showToast('Export failed: the browser could not start the CSV download.');
+    } finally {
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
