@@ -80,7 +80,7 @@ INSERT OR IGNORE INTO currencies(currency_code, name_ar, name_en, minor_units, i
     ('IQD','الدينار العراقي','Iraqi Dinar',3,1),
     ('ILS','الشيكل الإسرائيلي الجديد','Israeli New Shekel',2,1),
     ('JOD','الدينار الأردني','Jordanian Dinar',3,1),
-    ('JPY','الين الياباني','Japanese Yen',2,1),
+    ('JPY','الين الياباني','Japanese Yen',0,1),
     ('KWD','الدينار الكويتي','Kuwaiti Dinar',3,1),
     ('LBP','الليرة اللبنانية','Lebanese Pound',2,1),
     ('LYD','الدينار الليبي','Libyan Dinar',3,1),
@@ -108,6 +108,8 @@ CREATE TABLE IF NOT EXISTS company_currencies (
     PRIMARY KEY(company_id, currency_code)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_company_base_currency ON company_currencies(company_id) WHERE is_base=1;
+INSERT OR IGNORE INTO company_currencies(company_id, currency_code, is_base, is_active)
+SELECT c.company_id, c.currency_code, 1, 1 FROM companies c JOIN currencies cur ON cur.currency_code=c.currency_code;
 
 CREATE TABLE IF NOT EXISTS tax_codes (
     tax_code_id INTEGER PRIMARY KEY AUTOINCREMENT,
