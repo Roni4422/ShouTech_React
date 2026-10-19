@@ -22,11 +22,13 @@ The migration files in this repository are authoritative for the current databas
 | PostgreSQL | `011_accounting_periods_and_accounts.sql` | Chart of accounts, fiscal years/periods and posting-period guards |
 | PostgreSQL | `012_commercial_operations.sql` | Commercial documents, parties, warehouses, currencies/taxes, payments, stock ledger, bank/cheques, POS, orders, settings and audit |
 | PostgreSQL | `013_tenant_integrity.sql` | Cross-company reference guards and payment allocation limits |
+| PostgreSQL | `014_authentication_hardening.sql` | Password credential metadata, hashed sessions, authentication events and same-company session guard |
 | SQLite | `001_sqlite_core.sql` | Companies, users, products, journals and initial stock tables |
 | SQLite | `002_rbac.sql` through `008_journal_reversals.sql` | RBAC, indexes, outbound messages and journal reversal controls |
 | SQLite | `009_accounting_periods_and_accounts.sql` | Chart of accounts and fiscal years/periods |
 | SQLite | `010_commercial_operations.sql` | Commercial operations equivalent to PostgreSQL migration 012 |
 | SQLite | `011_tenant_integrity.sql` | Cross-company reference guards and payment allocation limits |
+| SQLite | `012_authentication_hardening.sql` | Password credential metadata, hashed sessions, authentication events and same-company session guard |
 
 **Migration-history caution:** the repository contains both PostgreSQL `003_modules.sql` and `004_modules.sql` with the same content/numbering pattern. They use `IF NOT EXISTS`, but migration runners must still use stable unique migration IDs and must not infer identity from the numeric prefix alone. Do not edit already-applied migrations to repair history; add a new migration and reconcile history deliberately.
 
@@ -35,7 +37,7 @@ The migration files in this repository are authoritative for the current databas
 | ERP window / capability | Main tables | Required service behavior |
 |---|---|---|
 | Company and company settings | `companies`, `company_currencies`, `application_settings`, `fiscal_years`, `fiscal_periods` | Tenant-scoped configuration; only one base currency; validate period ranges and lock closed periods |
-| Users and security | `users`, `roles`, `permissions`, `user_roles`, `role_permissions` | Server-side authentication/authorization; never trust browser-only role flags |
+| Users and security | `users`, `user_credentials`, `user_sessions`, `auth_events`, `roles`, `permissions`, `user_roles`, `role_permissions` | Server-side password verification (Argon2id), hashed opaque session tokens, tenant-scoped sessions, lockout and security audit; credential creation/verification still requires a trusted service |
 | Materials / product cards | `products`, `product_categories`, `units_of_measure` | Unique company-scoped code; validate unit, category, pricing and soft deletion |
 | Warehouses | `warehouses`, `stock_balances`, `stock_ledger_entries` | One default warehouse per company; derive balances from ledger or reconcile cached balances |
 | Customers and suppliers / CRM | `business_parties`, existing `crm.business_partners` | Normalize customer/supplier roles, tax identity and credit terms; avoid creating duplicate identities between modules |
