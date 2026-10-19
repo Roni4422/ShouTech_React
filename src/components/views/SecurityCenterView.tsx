@@ -7,8 +7,7 @@ import {
 
 export const SecurityCenterView: React.FC = () => {
   const { 
-    securityStatus, auditLogs, resetSecurityLockout, users, 
-    recordAuditEvent, showToast 
+    securityStatus, auditLogs, resetSecurityLockout, users, showToast 
   } = useApp();
 
     const [activeTab, setActiveTab] = useState<'status' | 'audit_chain' | 'rbac'>('status');
@@ -28,7 +27,7 @@ export const SecurityCenterView: React.FC = () => {
           <div>
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               <span>2026 Enterprise Security & Integrity Center</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono font-bold">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono font-bold">
                 Security integration unavailable
               </span>
             </h1>
@@ -74,19 +73,19 @@ export const SecurityCenterView: React.FC = () => {
       {activeTab === 'status' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-[#242424] border border-emerald-500/30 space-y-2">
+            <div className="p-4 rounded-xl bg-[#242424] border border-rose-500/30 space-y-2">
               <div className="flex items-center justify-between text-xs text-gray-400">
-                <span className="font-semibold text-white">2026 Cryptographic Dongle</span>
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-semibold text-white">Hardware Dongle Status</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
               </div>
               <div className="text-xl font-bold font-mono text-emerald-400">{securityStatus.dongleId}</div>
               <div className="text-[11px] text-gray-400">Firmware: {securityStatus.dongleFirmware}</div>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#242424] border border-cyan-500/30 space-y-2">
+            <div className="p-4 rounded-xl bg-[#242424] border border-rose-500/30 space-y-2">
               <div className="flex items-center justify-between text-xs text-gray-400">
                 <span className="font-semibold text-white">Anti-Tamper & Memory Guard</span>
-                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
               </div>
               <div className="text-xl font-bold text-white">Not active / not verified</div>
               <div className="text-[11px] text-gray-400">No hardware handshake has been verified</div>
@@ -97,8 +96,8 @@ export const SecurityCenterView: React.FC = () => {
                 <span className="font-semibold text-white">Encryption Standard</span>
                 <Cpu className="w-4 h-4 text-purple-400" />
               </div>
-              <div className="text-xl font-bold text-white">AES-256-GCM</div>
-              <div className="text-[11px] text-gray-400">Key Derivation: Argon2id (M=64MB, T=3)</div>
+              <div className="text-xl font-bold text-white">{securityStatus.encryptionMode}</div>
+              <div className="text-[11px] text-gray-400">Encryption and key derivation are not configured in this client.</div>
             </div>
           </div>
 
