@@ -7,8 +7,8 @@ import {
 
 export const LoginModal: React.FC = () => {
   const { 
-    appStage, currentCompany, login, users, translate, 
-    backToCompanySelect, securityStatus, resetSecurityLockout 
+    appStage, currentCompany, login, translate, 
+    backToCompanySelect, securityStatus 
   } = useApp();
 
   const [username, setUsername] = useState('admin');
@@ -17,19 +17,20 @@ export const LoginModal: React.FC = () => {
 
   if (appStage !== 'login') return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(username);
-    if (!success) {
-      setError(true);
+    setIsSubmitting(true);
+    setError(false);
+    try {
+      const success = await login(username, password);
+      setError(!success);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const selectUser = (u: string) => {
-    setUsername(u);
-    setPassword('');
-    setError(false);
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212] select-none p-4">
@@ -80,26 +81,6 @@ export const LoginModal: React.FC = () => {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs leading-5 text-amber-100">
-            <strong>Sign-in is unavailable:</strong> Access is blocked because this build has no trusted server-side password verification or authorization provider. Entering a username alone must never grant access.
-          </div>
-          {securityStatus.lockoutActive && (
-            <div className="p-3 bg-red-950/70 border border-red-500 rounded-lg text-red-200 text-xs flex items-start gap-2.5">
-              <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <div className="font-bold">Security Lockout Active</div>
-                <div>5 consecutive failed attempts detected. Protection mode activated.</div>
-                <button
-                  type="button"
-                  onClick={resetSecurityLockout}
-                  className="text-xs text-cyan-400 underline font-semibold mt-1"
-                >
-                  Clear Lockout as Admin
-                </button>
-              </div>
-            </div>
-          )}
-
           {error && !securityStatus.lockoutActive && (
             <div className="flex items-center gap-2 p-3 bg-red-950/60 border border-red-500/40 rounded-lg text-red-200 text-xs">
               <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
@@ -139,28 +120,6 @@ export const LoginModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick account switch for convenience */}
-          <div className="pt-2">
-            <span className="text-[11px] text-gray-400 block mb-2">{translate('login.defaultHint')}</span>
-            <div className="grid grid-cols-3 gap-2">
-              {users.map(u => (
-                <button
-                  type="button"
-                  key={u.id}
-                  onClick={() => selectUser(u.username)}
-                  className={`px-2 py-2 rounded-lg text-xs border text-center transition-all ${
-                    username === u.username
-                      ? 'bg-[#0078D4] text-white border-[#0078D4] font-semibold shadow'
-                      : 'bg-[#181818] text-gray-300 border-white/10 hover:border-white/30'
-                  }`}
-                >
-                  <div className="font-mono text-xs">{u.username}</div>
-                  <div className="text-[10px] opacity-75 capitalize">{u.role}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className="pt-4 flex items-center justify-between border-t border-white/10">
             <button
               type="button"
@@ -171,11 +130,11 @@ export const LoginModal: React.FC = () => {
             </button>
             <button
               type="submit"
-              disabled={securityStatus.lockoutActive}
+              disabled={isSubmitting}
               className="flex items-center gap-2 px-7 py-2.5 bg-gradient-to-r from-[#0078D4] to-[#005A9E] hover:from-[#1084D9] hover:to-[#0078D4] text-white rounded-xl font-bold text-xs shadow-lg transition-all hover:scale-102 disabled:opacity-50"
             >
               <KeyRound className="w-3.5 h-3.5" />
-              <span>موافق (تسجيل الدخول OK)</span>
+              <span>{isSubmitting ? 'Signing in…' : 'Sign in'}</span>
             </button>
           </div>
         </form>
