@@ -119,8 +119,9 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Helper to calculate SHA-256-like hex hash for audit chain
-function pseudoSha256(str: string): string {
+// Non-cryptographic digest retained for legacy audit display continuity only.
+// This is not SHA-256 and does not provide cryptographic tamper protection.
+function nonCryptographicAuditDigest(str: string): string {
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
   for (let i = 0; i < str.length; i++) {
     const ch = str.charCodeAt(i);
@@ -318,7 +319,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     licenseServerStatus: 'primed_listening',
     serverLeaseDaysRemaining: 365,
     antiTamperActive: true,
-    sha256ChainIntact: true,
+    sha256ChainIntact: false,
     failedLoginAttempts: 0,
     maxAttempts: 5,
     lockoutActive: false,
@@ -466,13 +467,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const translate = (key: string) => t(key, language);
 
-  // Immutable SHA-256 Audit Trail Chaining (Anti-Tamper Ledger)
+  // Legacy audit chaining uses a non-cryptographic digest and is not tamper-proof.
   const recordAuditEvent = (action: string, module: string, recordId: string) => {
     const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
     const lastEntry = auditLogs[0];
     const prevHash = lastEntry ? lastEntry.hash : '0000000000000000000000000000000000000000000000000000000000000000';
     const payload = `${prevHash}|${timestamp}|${currentUser?.username || 'system'}|${action}|${module}|${recordId}`;
-    const hash = pseudoSha256(payload);
+    const hash = nonCryptographicAuditDigest(payload);
 
     const newEntry: AuditLogEntry = {
       id: `aud-${Date.now()}`,
