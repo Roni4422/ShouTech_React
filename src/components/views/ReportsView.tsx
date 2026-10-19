@@ -126,12 +126,30 @@ export const ReportsView: React.FC = () => {
             </button>
             <button
               onClick={() => {
+                if (!fromDate || !toDate || fromDate > toDate) {
+                  showToast('Export rejected: enter a valid date range.');
+                  return;
+                }
                 if (activeReport === 'trial_balance') {
-                  exportCSV(accounts.map(a => ({ Code: a.code, Name: a.nameAr, Type: a.type, Balance: a.balance })), 'Trial_Balance');
+                  exportCSV(accounts.map(a => ({ Code: a.code, Name: a.nameAr, NameEn: a.nameEn, Type: a.type, Balance: a.balance })), 'Trial_Balance');
                 } else if (activeReport === 'stock_balances') {
-                  exportCSV(materials.map(m => ({ Code: m.code, Name: m.nameAr, Qty: m.qtyOnHand, Cost: m.cost, Total: m.qtyOnHand * m.cost })), 'Stock_Balances');
+                  exportCSV(materials.map(m => ({ Code: m.code, Name: m.nameAr, Category: m.category, Unit: m.defaultUnit, Quantity: m.qtyOnHand, Cost: m.cost, RetailPrice: m.priceRetail, TotalValuation: m.qtyOnHand * m.cost })), 'Stock_Balances');
+                } else if (activeReport === 'material_moves') {
+                  exportCSV(movements.filter(m => m.date >= fromDate && m.date <= toDate).map(m => ({
+                    Date: m.date, DocumentNo: m.docNo, Type: m.moveType, MaterialCode: m.materialCode,
+                    MaterialName: m.materialName, QuantityIn: m.qtyIn, QuantityOut: m.qtyOut,
+                    UnitCost: m.unitCost, TotalValue: m.totalValue, Notes: m.note
+                  })), 'Material_Movements');
+                } else if (activeReport === 'customer_aging') {
+                  exportCSV(parties.filter(p => p.type === 'Customer').map(c => ({
+                    CustomerCode: c.code, CustomerName: c.nameAr, TotalDue: c.balance
+                  })), 'Customer_Aging');
                 } else {
-                  showToast('Exported report');
+                  exportCSV(materials.map(m => ({
+                    Code: m.code, Material: m.nameAr, SellingPrice: m.priceRetail, AverageCost: m.cost,
+                    ProfitPerUnit: m.priceRetail - m.cost,
+                    MarginPercent: m.priceRetail > 0 ? ((m.priceRetail - m.cost) / m.priceRetail) * 100 : 0
+                  })), 'Item_Profitability');
                 }
               }}
               className="px-3 py-1.5 bg-[#0078D4] hover:bg-[#1084D9] rounded text-xs text-white flex items-center gap-1.5 shadow"
