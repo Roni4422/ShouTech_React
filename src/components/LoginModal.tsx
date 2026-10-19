@@ -12,7 +12,7 @@ export const LoginModal: React.FC = () => {
   } = useApp();
 
   const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
 
   if (appStage !== 'login') return null;
@@ -27,7 +27,7 @@ export const LoginModal: React.FC = () => {
 
   const selectUser = (u: string) => {
     setUsername(u);
-    setPassword(u);
+    setPassword('');
     setError(false);
   };
 
@@ -69,17 +69,20 @@ export const LoginModal: React.FC = () => {
 
         {/* 2026 Security Bar */}
         <div className="px-6 py-2.5 bg-[#171717] border-b border-white/5 flex items-center justify-between text-[11px] font-mono text-gray-300">
-          <div className="flex items-center gap-1.5 text-emerald-400">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>2026 Dongle Active (ID: {securityStatus.dongleId.slice(-8)})</span>
+          <div className={`flex items-center gap-1.5 ${securityStatus.dongleConnected ? 'text-emerald-400' : 'text-amber-300'}`}>
+            {securityStatus.dongleConnected ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+            <span>{securityStatus.dongleConnected ? `Hardware dongle connected (ID: ${securityStatus.dongleId.slice(-8)})` : 'Hardware dongle unavailable'}</span>
           </div>
           <div className="text-gray-400 text-[10px]">
-            Zero-Trust RBAC Guard
+            Client-side checks only
           </div>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs leading-5 text-amber-100">
+            <strong>Authentication limitation:</strong> This client currently does not verify passwords or enforce permissions through a trusted backend. Do not use it to protect real company data or production accounts.
+          </div>
           {securityStatus.lockoutActive && (
             <div className="p-3 bg-red-950/70 border border-red-500 rounded-lg text-red-200 text-xs flex items-start gap-2.5">
               <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
