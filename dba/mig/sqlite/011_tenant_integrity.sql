@@ -168,3 +168,65 @@ BEGIN
     SELECT 1 FROM chart_of_accounts a WHERE a.account_id=NEW.gl_account_id AND a.company_id=NEW.company_id
   ) THEN RAISE(ABORT, 'Bank GL account must belong to the same company') END;
 END;
+
+
+-- Apply the same tenant and amount checks when an allocation is edited.
+CREATE TRIGGER IF NOT EXISTS trg_payment_allocation_integrity_update
+BEFORE UPDATE ON payment_allocations
+BEGIN
+  SELECT CASE WHEN NOT EXISTS (
+    SELECT 1 FROM payments p JOIN commercial_documents d ON d.document_id=NEW.document_id
+    WHERE p.payment_id=NEW.payment_id AND p.company_id=NEW.company_id
+      AND d.company_id=NEW.company_id AND p.currency_code=d.currency_code
+  ) THEN RAISE(ABORT, 'Payment and document must share company and currency') END;
+  SELECT CASE WHEN NEW.allocated_amount + COALESCE((
+    SELECT sum(a.allocated_amount) FROM payment_allocations a
+    WHERE a.payment_id=NEW.payment_id AND a.allocation_id<>OLD.allocation_id
+  ),0) > (SELECT p.amount FROM payments p WHERE p.payment_id=NEW.payment_id)
+    THEN RAISE(ABORT, 'Allocations exceed payment amount') END;
+  SELECT CASE WHEN NEW.allocated_amount + COALESCE((
+    SELECT sum(a.allocated_amount) FROM payment_allocations a
+    WHERE a.document_id=NEW.document_id AND a.allocation_id<>OLD.allocation_id
+  ),0) > (SELECT d.grand_total FROM commercial_documents d WHERE d.document_id=NEW.document_id)
+    THEN RAISE(ABORT, 'Allocations exceed document total') END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_pos_transaction_tenant_update
+BEFORE UPDATE OF company_id, pos_session_id, document_id ON pos_transactions
+BEGIN
+  SELECT CASE WHEN NOT EXISTS (
+    SELECT 1 FROM pos_sessions s WHERE s.pos_session_id=NEW.pos_session_id AND s.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'POS session must belong to the same company') END;
+  SELECT CASE WHEN NEW.document_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM commercial_documents d WHERE d.document_id=NEW.document_id AND d.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'POS document must belong to the same company') END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_order_tenant_update
+BEFORE UPDATE OF company_id, party_id, source_document_id ON commercial_orders
+BEGIN
+  SELECT CASE WHEN NEW.party_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM business_parties p WHERE p.party_id=NEW.party_id AND p.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'Order party must belong to the same company') END;
+  SELECT CASE WHEN NEW.source_document_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM commercial_documents d WHERE d.document_id=NEW.source_document_id AND d.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'Order source document must belong to the same company') END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_order_line_tenant_update
+BEFORE UPDATE OF order_id, product_id ON commercial_order_lines
+BEGIN
+  SELECT CASE WHEN NEW.product_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM products p JOIN commercial_orders o ON o.order_id=NEW.order_id
+    WHERE p.product_id=NEW.product_id AND p.company_id=o.company_id
+  ) THEN RAISE(ABORT, 'Order product must belong to the order company') END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_bank_account_tenant_update
+BEFORE UPDATE OF company_id, gl_account_id ON bank_accounts
+WHEN NEW.gl_account_id IS NOT NULL
+BEGIN
+  SELECT CASE WHEN NOT EXISTS (
+    SELECT 1 FROM chart_of_accounts a WHERE a.account_id=NEW.gl_account_id AND a.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'Bank GL account must belong to the same company') END;
+END;
