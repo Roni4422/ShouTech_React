@@ -21,6 +21,9 @@ export const CompanyModal: React.FC = () => {
   const [newCode, setNewCode] = useState(`00${companies.length + 1}`);
   const [newNameAr, setNewNameAr] = useState('');
   const [newNameEn, setNewNameEn] = useState('');
+  const [newCommercialName, setNewCommercialName] = useState('');
+  const [newCommercialRegister, setNewCommercialRegister] = useState('');
+  const [newPhone, setNewPhone] = useState('');
   const [selectedTreeId, setSelectedTreeId] = useState<string>('sa_zatca');
   const [newTaxId, setNewTaxId] = useState('');
   const [newVat, setNewVat] = useState('');
@@ -29,7 +32,7 @@ export const CompanyModal: React.FC = () => {
   // Backup location preferences for the new company
   const [backupLocationType, setBackupLocationType] = useState<'local_appdata' | 'custom'>('local_appdata');
   const [customBackupPath, setCustomBackupPath] = useState('');
-  const [autoCloudBackup, setAutoCloudBackup] = useState(true);
+  const [autoCloudBackup, setAutoCloudBackup] = useState(false);
 
   const selectedTree = ACCOUNTING_TREES.find(t => t.id === selectedTreeId) || ACCOUNTING_TREES[0];
 
@@ -67,14 +70,14 @@ export const CompanyModal: React.FC = () => {
       code: normalizedCode,
       name: newNameAr.trim(),
       nameEn: newNameEn.trim() || newNameAr.trim(),
-      commercialName: newNameAr.trim(),
+      commercialName: newCommercialName.trim() || newNameAr.trim(),
       taxId: newTaxId.trim(),
-      commercialRegister: '',
+      commercialRegister: newCommercialRegister.trim(),
       vatNumber: newVat.trim(),
       address: newCity.trim(),
-      phone: '',
+      phone: newPhone.trim(),
       currency: selectedTree.currency,
-      database: `SQLite (${newCode}_${selectedTree.code}.db)`,
+      database: `غير منشأة — SQLite (${normalizedCode}_${selectedTree.code}.db)`, 
       isDefault: false,
       accountingTreeTemplateId: selectedTreeId,
       databaseType: 'sqlite',
@@ -85,7 +88,7 @@ export const CompanyModal: React.FC = () => {
 
     addCompany(created);
     setShowAddCompany(false);
-    showToast(`تم حفظ سجل الشركة محلياً: ${newNameAr.trim()}. لم تُنشأ قاعدة بيانات فعلية ولم يُفعّل النسخ السحابي.`);
+    showToast(`تم حفظ سجل الشركة محلياً: ${newNameAr.trim()}. لم تُنشأ قاعدة بيانات أو يُستورد دليل الحسابات أو يُفعّل النسخ السحابي.`);
   };
 
   return (
@@ -182,6 +185,54 @@ export const CompanyModal: React.FC = () => {
                     value={newNameEn}
                     placeholder="e.g. Arab Star Trading Co."
                     onChange={e => setNewNameEn(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-[#121212] border border-white/20 rounded text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">الاسم التجاري</label>
+                  <input
+                    type="text"
+                    value={newCommercialName}
+                    onChange={e => setNewCommercialName(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-[#121212] border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">الهاتف</label>
+                  <input
+                    type="tel"
+                    value={newPhone}
+                    onChange={e => setNewPhone(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-[#121212] border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">رقم التسجيل التجاري</label>
+                  <input
+                    type="text"
+                    value={newCommercialRegister}
+                    onChange={e => setNewCommercialRegister(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-[#121212] border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">الرقم الضريبي</label>
+                  <input
+                    type="text"
+                    value={newTaxId}
+                    onChange={e => setNewTaxId(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-[#121212] border border-white/20 rounded text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">رقم ضريبة القيمة المضافة</label>
+                  <input
+                    type="text"
+                    value={newVat}
+                    onChange={e => setNewVat(e.target.value)}
                     className="w-full px-2.5 py-1.5 bg-[#121212] border border-white/20 rounded text-white"
                   />
                 </div>
