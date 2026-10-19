@@ -25,6 +25,7 @@ Keep schema definitions in `dba`. Runtime SQL, transaction orchestration, valida
 | `010_journal_reversals.sql` | Journal reversal support |
 | `011_accounting_periods_and_accounts.sql` | Chart of accounts and fiscal-period controls |
 | `012_commercial_operations.sql` | Parties, warehouses, currencies, tax codes, commercial documents, payments/allocations, stock ledger, banks, cheques, POS, orders, settings and audit |
+| `013_tenant_integrity.sql` | Database-level same-company guards for commercial, inventory, POS, allocation and bank-account references |
 
 ## SQLite migration sequence
 
@@ -40,6 +41,7 @@ Keep schema definitions in `dba`. Runtime SQL, transaction orchestration, valida
 | `008_journal_reversals.sql` | Journal reversal support |
 | `009_accounting_periods_and_accounts.sql` | Chart of accounts and fiscal-period controls |
 | `010_commercial_operations.sql` | Commercial operations tables and currency baseline |
+| `011_tenant_integrity.sql` | Database-level same-company guards and payment-allocation caps |
 
 ## Domain overview
 
@@ -64,4 +66,4 @@ Keep schema definitions in `dba`. Runtime SQL, transaction orchestration, valida
 5. Secret settings and bank account identifiers require encryption at the service boundary; never store plaintext credentials or encryption keys in the database.
 6. Do not treat browser `localStorage` as a production persistence layer.
 7. Migration IDs must be unique and stored with checksums. The duplicate PostgreSQL module migrations need migration-history reconciliation; do not edit historical migrations already applied to customer databases.
-8. The new migrations are schema work, not proof that React screens or C# services are connected. Verify migrations against fresh and upgraded SQLite/PostgreSQL databases before production rollout.
+8. Migrations `011_tenant_integrity.sql` (SQLite) and `013_tenant_integrity.sql` (PostgreSQL) add defense-in-depth tenant checks for commercial documents/lines, payments/allocations, stock entries, POS transactions, orders and bank GL links. These guards do not replace service authorization, and they do not yet cover every legacy module table.\n9. The new migrations are schema work, not proof that React screens or C# services are connected. These tenant-integrity migrations have not yet been executed against real SQLite/PostgreSQL instances; verify fresh install, upgrade path, cross-company rejection, and allocation edge cases before production rollout.
