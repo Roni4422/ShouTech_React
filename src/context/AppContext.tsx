@@ -119,6 +119,33 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// One-time cleanup of browser-only demo/business records from older builds.
+// UI preferences are retained. This does not touch any external database or files.
+const LEGACY_BUSINESS_STORAGE_KEYS = [
+  'shoutech_companies', 'shoutech_users', 'shoutech_materials',
+  'shoutech_warehouses', 'shoutech_accounts', 'shoutech_invoices',
+  'shoutech_journals', 'shoutech_movements', 'shoutech_backups',
+  'shoutech_cheques', 'shoutech_audit', 'shoutech_parties',
+  'shoutech_cost_centers'
+] as const;
+
+function clearLegacyBrowserBusinessDataOnce(): void {
+  const marker = 'shoutech_empty_demo_data_cleanup_v1';
+  try {
+    if (localStorage.getItem(marker) === 'done') return;
+    LEGACY_BUSINESS_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+    localStorage.setItem(marker, 'done');
+  } catch {
+    // The application still starts empty if browser storage is unavailable.
+  }
+}
+
+const EMPTY_COMPANY: Company = {
+  id: '', code: '', name: '', nameEn: '', commercialName: '', taxId: '',
+  commercialRegister: '', vatNumber: '', address: '', phone: '', currency: '',
+  database: '', isDefault: false
+};
+
 // Non-cryptographic digest retained for legacy audit display continuity only.
 // This is not SHA-256 and does not provide cryptographic tamper protection.
 function nonCryptographicAuditDigest(str: string): string {
@@ -138,6 +165,7 @@ function nonCryptographicAuditDigest(str: string): string {
 }
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  clearLegacyBrowserBusinessDataOnce();
   // Config
   const [language, setLanguageState] = useState<LanguageCode>(() => {
     return (localStorage.getItem('shoutech_lang') as LanguageCode) || 'ar';
@@ -270,47 +298,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Strict Enterprise Startup Lifecycle: Splash -> Company Select -> Login -> Main
   const [appStage, setAppStage] = useState<AppStage>('splash');
 
-  // Entities
-  const [companies, setCompanies] = useState<Company[]>(() => {
-    const saved = localStorage.getItem('shoutech_companies');
-    return saved ? JSON.parse(saved) : INITIAL_COMPANIES;
-  });
-  const [currentCompany, setCurrentCompany] = useState<Company>(INITIAL_COMPANIES[0]);
-  // User profiles are cached per browser only. This is not a secure identity store.
-  const [users, setUsers] = useState<User[]>(() => {
-    try {
-      const saved = localStorage.getItem('shoutech_users');
-      if (!saved) return INITIAL_USERS;
-      const parsed: unknown = JSON.parse(saved);
-      if (
-        Array.isArray(parsed) &&
-        parsed.every((entry: unknown) => {
-          if (!entry || typeof entry !== 'object') return false;
-          const user = entry as Partial<User>;
-          return typeof user.id === 'string' &&
-            typeof user.username === 'string' &&
-            typeof user.fullName === 'string' &&
-            typeof user.fullNameEn === 'string' &&
-            typeof user.email === 'string' &&
-            (user.role === 'admin' || user.role === 'user' || user.role === 'viewer') &&
-            typeof user.active === 'boolean' &&
-            Array.isArray(user.permissions);
-        })
-      ) {
-        return parsed as User[];
-      }
-    } catch {
-      // Ignore malformed browser cache and fall back to bundled starter profiles.
-    }
-    return INITIAL_USERS;
-  });
-  // Authentication must start unauthenticated; never grant the first seeded user implicitly.
+  // Entities: no demo or browser-cached business records are loaded at startup.
+  const [companies, setCompanies] = useState<Company[]>(() => INITIAL_COMPANIES);
+  const [currentCompany, setCurrentCompany] = useState<Company>(EMPTY_COMPANY);
+  const [users, setUsers] = useState<User[]>(() => INITIAL_USERS);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // 2026 High-Level Security Engine State
   const [securityStatus, setSecurityStatus] = useState<SecurityStatus>({
-    dongleConnected: false, // Per request: hardware dongle is currently physically unavailable, but primed and listening
+    dongleConnected: false,
     dongleId: 'Not connected',
     dongleFirmware: 'Not detected',
     donglePrimedForReception: false,
@@ -330,52 +326,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     lastCloudBackupTimestamp: undefined
   });
 
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
-    const saved = localStorage.getItem('shoutech_audit');
-    return saved ? JSON.parse(saved) : INITIAL_AUDIT_LOGS;
-  });
-
-  const [materials, setMaterials] = useState<Material[]>(() => {
-    const saved = localStorage.getItem('shoutech_materials');
-    return saved ? JSON.parse(saved) : INITIAL_MATERIALS;
-  });
-
-  const [warehouses, setWarehouses] = useState<Warehouse[]>(() => {
-    const saved = localStorage.getItem('shoutech_warehouses');
-    return saved ? JSON.parse(saved) : INITIAL_WAREHOUSES;
-  });
-
-  const [accounts, setAccounts] = useState<Account[]>(() => {
-    const saved = localStorage.getItem('shoutech_accounts');
-    return saved ? JSON.parse(saved) : INITIAL_ACCOUNTS;
-  });
-
-  const [invoices, setInvoices] = useState<Invoice[]>(() => {
-    const saved = localStorage.getItem('shoutech_invoices');
-    return saved ? JSON.parse(saved) : INITIAL_INVOICES;
-  });
-
-  const [journals, setJournals] = useState<JournalEntry[]>(() => {
-    const saved = localStorage.getItem('shoutech_journals');
-    return saved ? JSON.parse(saved) : INITIAL_JOURNALS;
-  });
-
-  const [movements, setMovements] = useState<StockMovement[]>(() => {
-    const saved = localStorage.getItem('shoutech_movements');
-    return saved ? JSON.parse(saved) : INITIAL_MOVEMENTS;
-  });
-
-  const [backups, setBackups] = useState<BackupRecord[]>(() => {
-    const saved = localStorage.getItem('shoutech_backups');
-    return saved ? JSON.parse(saved) : INITIAL_BACKUPS;
-  });
-
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => INITIAL_AUDIT_LOGS);
+  const [materials, setMaterials] = useState<Material[]>(() => INITIAL_MATERIALS);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>(() => INITIAL_WAREHOUSES);
+  const [accounts, setAccounts] = useState<Account[]>(() => INITIAL_ACCOUNTS);
+  const [invoices, setInvoices] = useState<Invoice[]>(() => INITIAL_INVOICES);
+  const [journals, setJournals] = useState<JournalEntry[]>(() => INITIAL_JOURNALS);
+  const [movements, setMovements] = useState<StockMovement[]>(() => INITIAL_MOVEMENTS);
+  const [backups, setBackups] = useState<BackupRecord[]>(() => INITIAL_BACKUPS);
   const [parties] = useState<CustomerParty[]>(INITIAL_PARTIES);
   const [costCenters] = useState<CostCenter[]>(INITIAL_COST_CENTERS);
-  const [cheques, setCheques] = useState<ChequeRecord[]>(() => {
-    const saved = localStorage.getItem('shoutech_cheques');
-    return saved ? JSON.parse(saved) : INITIAL_CHEQUES;
-  });
+  const [cheques, setCheques] = useState<ChequeRecord[]>(() => INITIAL_CHEQUES);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -546,6 +507,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addCompany = (comp: Omit<Company, 'id'>) => {
     const newComp: Company = { ...comp, id: `ST-COMP-${Date.now().toString().slice(-3)}` };
+    if (companies.length === 0) setCurrentCompany(newComp);
     setCompanies(prev => [...prev, newComp]);
     recordAuditEvent('CREATE_COMPANY', 'MultiCompany', newComp.code);
     showToast(`Company registered: ${newComp.name}`);
