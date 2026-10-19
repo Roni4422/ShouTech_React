@@ -175,7 +175,6 @@ export const BackupView: React.FC = () => {
             </div>
           </div>
 
-}
         </div>
 
         {/* Backups Table (Local & Cloud Vault Snapshots) */}
@@ -248,10 +247,10 @@ export const BackupView: React.FC = () => {
                           handleRestore(b.id);
                         }}
                         className="px-3 py-1 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded text-xs font-bold shadow flex items-center gap-1 mx-auto"
-                        title="استرجاع النسخة وفتح البرنامج عليها كنسخة طبق الأصل"
+                        title="استعادة لقطة محفوظة في جلسة التطبيق الحالية فقط"
                       >
                         <RotateCcw className="w-3 h-3" />
-                        <span>استعادة مرآة</span>
+                        <span>استعادة لقطة الجلسة</span>
                       </button>
                     </td>
                   </tr>
