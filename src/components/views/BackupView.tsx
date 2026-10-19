@@ -16,7 +16,7 @@ export const BackupView: React.FC = () => {
 
   const [selectedId, setSelectedId] = useState<string>(backups[0]?.id || '');
   const [backupNote, setBackupNote] = useState('نسخة احتياطية مرآة كاملة للشركة وقواعد البيانات');
-  const [targetLocation, setTargetLocation] = useState<'cloud_vault' | 'local' | 'custom_path'>('cloud_vault');
+  const [targetLocation, setTargetLocation] = useState<'cloud_vault' | 'local' | 'custom_path'>('local');
   const [customPath, setCustomPath] = useState(currentCompany.backupLocation || 'D:\\ShouTech_Backups\\Vault\\');
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -27,21 +27,12 @@ export const BackupView: React.FC = () => {
   const handleCreate = (trigger: 'manual' | 'session_end' | 'session_start' = 'manual') => {
     const record = createBackup(backupNote, targetLocation, trigger);
     setSelectedId(record.id);
-    showToast(`تم إنشاء النسخة الاحتياطية المرآة بنجاح: ${record.name}`);
   };
 
   const handleRestore = (id: string) => {
     if (window.confirm('تأكيد استعادة النسخة الاحتياطية المرآة الكاملة؟ سيتم استرجاع كافة بيانات الشركة، قيود اليومية، المواد، الحسابات، والمستخدمين وتفضيلاتهم كما كانت في تاريخ النسخة.')) {
       restoreBackup(id);
     }
-  };
-
-  const handleSimulateCloudSync = () => {
-    setIsSyncing(true);
-    setTimeout(() => {
-      setIsSyncing(false);
-      showToast('تمت مزامنة النسخ السحابية الـ 3 مع خادم النسخ الاحتياطي في الخلفية بنجاح [Cloud Vault OK]');
-    }, 1200);
   };
 
   return (
@@ -56,7 +47,7 @@ export const BackupView: React.FC = () => {
             <h1 className="text-sm font-bold text-white flex items-center gap-2">
               <span>{translate('backup.title')} وإدارة النسخ السحابية المرآة (Disaster Recovery)</span>
               <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono font-bold">
-                Military AES-256-GCM
+                JSON snapshot — not encrypted
               </span>
             </h1>
             <p className="text-[11px] text-gray-400">
@@ -103,15 +94,15 @@ export const BackupView: React.FC = () => {
             <Cloud className="w-6 h-6 text-cyan-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-white">الخادم السحابي الدوار (Cloud Vault)</span>
+                <span className="font-bold text-xs text-white">النسخ السحابي (غير متصل)</span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono font-bold">3 نسخ كحد أقصى</span>
               </div>
               <p className="text-[11px] text-gray-300">
-                إرسال تلقائي بالخلفية عند توفر الإنترنت: عند نهاية العمل والإغلاق، وفي اليوم التالي عند بداية العمل.
+                لا يوجد تكامل بخادم سحابي في هذا الإصدار؛ لن ندّعي رفع النسخ أو مزامنتها قبل تنفيذ اتصال خادم موثوق.
               </p>
               <div className="flex items-center gap-2 pt-1 font-mono text-[10px] text-emerald-400">
                 <Wifi className="w-3 h-3" />
-                <span>الإنترنت متصل · التدوير السحابي نشط (FIFO Retention)</span>
+                <span>لا يوجد اتصال سحابي مهيأ</span>
               </div>
             </div>
           </div>
@@ -124,7 +115,7 @@ export const BackupView: React.FC = () => {
                 مسار التخزين الافتراضي: <strong className="text-purple-300 font-mono">%LocalAppData%\ShouTech\Backups</strong> مع تفضيلات المستخدم وقواعد البيانات.
               </p>
               <div className="text-[10px] text-gray-400 font-mono pt-1">
-                القرص المحلي: جاهز ومحمي بتشفير FIPS 140-3
+                الملف الناتج غير مشفّر؛ احفظه في موقع آمن ولا تشاركه مع غير المخوّلين.
               </div>
             </div>
           </div>
@@ -132,12 +123,12 @@ export const BackupView: React.FC = () => {
           <div className="p-3.5 bg-[#252526] rounded-xl border border-emerald-500/40 flex items-start gap-3">
             <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <span className="font-bold text-xs text-white block">النسخة الاحتياطية المرآة الكاملة (100% Mirror)</span>
+              <span className="font-bold text-xs text-white block">لقطة بيانات للتصدير (JSON Snapshot)</span>
               <p className="text-[11px] text-gray-300">
-                عند الاستعادة، يفتح البرنامج على تلك النسخة بشكل كامل بكافة بيانات الشركة والقيود والمواد والمستخدمين وتفضيلاتهم.
+                تُحتفظ اللقطة داخل جلسة التطبيق الحالية للاسترجاع المؤقت. استيراد ملف بعد إعادة تشغيل التطبيق يحتاج إلى مسار استعادة مستقل.
               </p>
               <div className="text-[10px] text-emerald-400 font-mono pt-1 font-bold">
-                المطابقة: 100% متطابقة مع بيئة العمل الأصلية
+                ليست نسخة قاعدة بيانات كاملة ولا تشمل الملفات الخارجية أو إعدادات الخادم.
               </div>
             </div>
           </div>
@@ -148,7 +139,7 @@ export const BackupView: React.FC = () => {
           <div className="flex items-center justify-between pb-2 border-b border-[#383838]">
             <span className="font-bold text-xs text-white flex items-center gap-1.5">
               <Plus className="w-4 h-4 text-emerald-400" />
-              <span>إنشاء نسخة مرآة جديدة مشفرة للشركة النشطة</span>
+              <span>تنزيل لقطة JSON للشركة النشطة</span>
             </span>
             <button
               onClick={handleSimulateCloudSync}
@@ -178,9 +169,7 @@ export const BackupView: React.FC = () => {
                 onChange={e => setTargetLocation(e.target.value as any)}
                 className="w-full bg-[#1A1A1A] border border-[#444] rounded px-3 py-1.5 text-xs text-white font-medium"
               >
-                <option value="cloud_vault">خادم النسخ السحابي المشفر (Cloud Vault - 3 نسخ دوارة)</option>
-                <option value="local">المسار الافتراضي %LocalAppData%\ShouTech\Backups</option>
-                <option value="custom_path">مسار مخصص آخر (قرص صلب أو مجلد شبكة)</option>
+                <option value="local">تنزيل ملف JSON عبر المتصفح (غير مشفّر)</option>
               </select>
             </div>
 
@@ -217,7 +206,7 @@ export const BackupView: React.FC = () => {
               <span className="font-bold text-white">سجل النسخ الاحتياطية المتاحة للاستعادة ({companyBackups.length})</span>
             </div>
             <span className="text-[11px] text-gray-400 font-mono">
-              الخادم يحتفظ بـ 3 نسخ سحابية دوارة لكل شركة
+              لا يوجد خادم سحابي متصل
             </span>
           </div>
 
@@ -253,7 +242,7 @@ export const BackupView: React.FC = () => {
                         <span>{b.name}</span>
                       </div>
                       <div className="text-[10px] text-gray-400 font-mono mt-0.5">
-                        SHA-256: {b.sha256Checksum ? b.sha256Checksum.slice(0, 16) + '...' : '9e8a7c2b...'} · {b.encryptionAlgorithm || 'AES-256-GCM'}
+                        صيغة JSON · غير مشفّر · لم يتم التحقق من سلامة الملف
                       </div>
                     </td>
                     <td className="p-2.5 text-center font-mono text-gray-300">{b.date}</td>
@@ -268,7 +257,7 @@ export const BackupView: React.FC = () => {
                     <td className="p-2.5 text-center">
                       <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] flex items-center justify-center gap-1 mx-auto w-fit">
                         <CheckCircle2 className="w-3 h-3" />
-                        <span>سليمة ومعتمدة</span>
+                        <span>لم تُفحص</span>
                       </span>
                     </td>
                     <td className="p-2.5 text-gray-300 text-xs">{b.note}</td>
@@ -299,7 +288,7 @@ export const BackupView: React.FC = () => {
         <div className="text-gray-400 font-mono text-[11px] flex items-center gap-3">
           <span>الشركة: <strong className="text-white">{currentCompany.name}</strong></span>
           <span>·</span>
-          <span>النسخ المحفوظة بالخادم: <strong className="text-cyan-400">{Math.min(3, cloudBackups.length)} من أصل 3 كحد أقصى</strong></span>
+          <span>النسخ السحابية: <strong className="text-cyan-400">غير مفعّلة</strong></span>
         </div>
 
         <div className="flex items-center gap-2.5">
