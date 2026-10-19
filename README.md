@@ -40,7 +40,7 @@ Rewritten from the desktop .NET WPF application into a modern, responsive React 
    - Print preview and CSV export capabilities.
 
 7. **Backup & Security Engine**
-   - **STBK2 Backup Manager**: Instant local AES-256 encrypted archive creation, integrity verification, and restoration.
+   - **Backup**: Downloads a browser-generated JSON snapshot. Encryption, cloud synchronization, cryptographic integrity checks, and restoring from an exported file are not available yet.
    - **Multi-Role RBAC**: Administrator, User (Operations), and Viewer (Read-only) levels with user management.
    - **Multi-Company & Multi-Language**: Company selection, Arabic (RTL), English (LTR), French, and Turkish translations.
 
