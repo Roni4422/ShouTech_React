@@ -34,9 +34,9 @@ public sealed class DbConnectionFactory(IConfiguration configuration) : IDbConne
     public async Task<bool> HasAuthenticationSchemaAsync(DbConnection connection)
     {
         var sql = _provider == "sqlite"
-            ? "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ('companies','users','user_credentials','user_sessions','auth_events')"
-            : "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name IN ('companies','users','user_credentials','user_sessions','auth_events')";
-        return await Dapper.SqlMapper.QuerySingleAsync<int>(connection, sql) == 5;
+            ? "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ('companies','users','user_credentials','user_sessions','auth_events','roles','permissions','user_roles','role_permissions')"
+            : "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name IN ('companies','users','user_credentials','user_sessions','auth_events','roles','permissions','user_roles','role_permissions')";
+        return await Dapper.SqlMapper.QuerySingleAsync<int>(connection, sql) == 9;
     }
 
     public object ToIdentifier(string value) =>
