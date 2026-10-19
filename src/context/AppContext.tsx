@@ -834,6 +834,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addUser = (userData: Omit<User, 'id'>) => {
+    if (currentUser?.role !== 'admin') {
+      showToast('User creation denied: administrator privileges are required.');
+      return;
+    }
     const normalizedUsername = userData.username.trim().toLocaleLowerCase();
     if (!normalizedUsername || users.some(user => user.username.trim().toLocaleLowerCase() === normalizedUsername)) {
       showToast('User was not created: username is required or already exists.');
@@ -860,6 +864,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     id: string,
     changes: Partial<Pick<User, 'fullName' | 'fullNameEn' | 'email' | 'role' | 'active' | 'permissions'>>
   ): boolean => {
+    if (currentUser?.role !== 'admin') {
+      showToast('User update denied: administrator privileges are required.');
+      return false;
+    }
     const target = users.find(user => user.id === id);
     if (!target) {
       showToast('User update failed: record not found.');
@@ -875,7 +883,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast('The last active administrator cannot be demoted or deactivated.');
       return false;
     }
-    if (changes.role === 'admin' && changes.permissions && !changes.permissions.includes('all')) {
+    const nextPermissions = changes.permissions ?? target.permissions;
+    if (changes.role === 'admin' && !nextPermissions.includes('all')) {
       showToast('Administrator role requires the explicit all-permissions grant.');
       return false;
     }
