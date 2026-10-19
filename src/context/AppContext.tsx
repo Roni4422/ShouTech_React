@@ -698,27 +698,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const reverseInvoice = (id: number, reason: string): boolean => {
     const target = invoices.find(i => i.id === id);
-    if (!target || target.status !== 'Posted') return false;
-
-    const isSales = target.kind === 'sales' || target.kind === 'pos';
-    setMaterials(prev => prev.map(mat => {
-      const line = target.lines.find(l => l.materialCode === mat.code);
-      if (line) {
-        const rollback = isSales ? line.qty : -line.qty;
-        return { ...mat, qtyOnHand: Math.max(0, mat.qtyOnHand + rollback) };
+    const cleanReason = reason.trim();
+    if (!target || target.status !== 'Posted' || !cleanReason) {
+      showToast('Reversal rejected: a posted invoice and a reason are required.');
+      return false;
+    }
+    const reversalDocNo = 'REV-' + target.docNo;
+    if (invoices.some(invoice => invoice.docNo === reversalDocNo)) {
+      showToast('Reversal rejected: a reversal record already exists for this invoice.');
+      return false;
+    }
+    const originalDirection = (kind: Invoice['kind']): number => {
+      if (kind === 'sales' || kind === 'pos' || kind === 'stock_out' || kind === 'purchase_return') return -1;
+      if (kind === 'purchase' || kind === 'stock_in' || kind === 'sales_return') return 1;
+      return 0;
+    };
+    const direction = -originalDirection(target.kind);
+    const requestedByCode = new Map<string, number>();
+    if (direction !== 0) {
+      for (const line of target.lines) {
+        requestedByCode.set(line.materialCode, (requestedByCode.get(line.materialCode) || 0) + line.qty * direction);
       }
-      return mat;
+      for (const [code, delta] of requestedByCode) {
+        const material = materials.find(item => item.code === code);
+        if (!material || material.qtyOnHand + delta < -0.000001) {
+          showToast('Reversal rejected: current stock cannot support reversing material ' + code + '.');
+          return false;
+        }
+      }
+    }
+    const materialNames = new Map(materials.map(material => [material.code, material.nameAr]));
+    const now = Date.now();
+    const reversalMovements: StockMovement[] = direction === 0 ? [] : target.lines.map((line, idx) => ({
+      id: now + idx,
+      docNo: reversalDocNo,
+      date: new Date().toISOString().slice(0, 10),
+      moveType: 'Reversal',
+      materialCode: line.materialCode,
+      materialName: materialNames.get(line.materialCode) || line.description,
+      warehouseCode: warehouses.find(warehouse => warehouse.id === target.warehouseId)?.code || 'UNASSIGNED',
+      unit: line.unit,
+      qtyIn: direction > 0 ? line.qty : 0,
+      qtyOut: direction < 0 ? line.qty : 0,
+      unitCost: line.unitPrice,
+      totalValue: line.lineTotal,
+      note: 'Reversal of ' + target.docNo + ': ' + cleanReason
     }));
-
-    const reversalDocNo = `REV-${target.docNo}`;
-    setInvoices(prev => prev.map(i => i.id === id ? { 
-      ...i, 
-      status: 'Reversed', 
+    if (direction !== 0) {
+      setMaterials(prev => prev.map(material => {
+        const delta = requestedByCode.get(material.code);
+        return delta === undefined ? material : { ...material, qtyOnHand: material.qtyOnHand + delta };
+      }));
+      setMovements(prev => [...reversalMovements, ...prev]);
+    }
+    setInvoices(prev => prev.map(i => i.id === id ? {
+      ...i,
+      status: 'Reversed',
       reversedDocNo: reversalDocNo,
-      reversalReason: reason 
+      reversalReason: cleanReason
     } : i));
-
-    recordAuditEvent('REVERSE_INVOICE', 'Invoices', `${target.docNo} -> ${reversalDocNo}`);
+    recordAuditEvent('REVERSE_INVOICE', 'Invoices', target.docNo + ' -> ' + reversalDocNo + '; reason: ' + cleanReason);
     showToast(translate('inv.reverseSuccess'));
     return true;
   };
