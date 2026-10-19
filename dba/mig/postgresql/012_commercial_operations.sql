@@ -60,6 +60,46 @@ CREATE TABLE IF NOT EXISTS currencies (
     minor_units smallint NOT NULL DEFAULT 2 CHECK (minor_units BETWEEN 0 AND 6),
     is_active boolean NOT NULL DEFAULT true
 );
+
+-- Seed common ISO currency metadata; company-specific base currency remains configurable.
+INSERT INTO currencies(currency_code, name_ar, name_en, minor_units, is_active) VALUES
+    ('AED','الدرهم الإماراتي','UAE Dirham',2,true),
+    ('AUD','الدولار الأسترالي','Australian Dollar',2,true),
+    ('BHD','الدينار البحريني','Bahraini Dinar',3,true),
+    ('BRL','الريال البرازيلي','Brazilian Real',2,true),
+    ('CAD','الدولار الكندي','Canadian Dollar',2,true),
+    ('CHF','الفرنك السويسري','Swiss Franc',2,true),
+    ('CNY','اليوان الصيني','Chinese Yuan',2,true),
+    ('DKK','الكرونة الدنماركية','Danish Krone',2,true),
+    ('DZD','الدينار الجزائري','Algerian Dinar',2,true),
+    ('EGP','الجنيه المصري','Egyptian Pound',2,true),
+    ('EUR','اليورو','Euro',2,true),
+    ('GBP','الجنيه الإسترليني','Pound Sterling',2,true),
+    ('INR','الروبية الهندية','Indian Rupee',2,true),
+    ('IQD','الدينار العراقي','Iraqi Dinar',3,true),
+    ('ILS','الشيكل الإسرائيلي الجديد','Israeli New Shekel',2,true),
+    ('JOD','الدينار الأردني','Jordanian Dinar',3,true),
+    ('JPY','الين الياباني','Japanese Yen',2,true),
+    ('KWD','الدينار الكويتي','Kuwaiti Dinar',3,true),
+    ('LBP','الليرة اللبنانية','Lebanese Pound',2,true),
+    ('LYD','الدينار الليبي','Libyan Dinar',3,true),
+    ('MAD','الدرهم المغربي','Moroccan Dirham',2,true),
+    ('NOK','الكرونة النرويجية','Norwegian Krone',2,true),
+    ('OMR','الريال العماني','Omani Rial',3,true),
+    ('PKR','الروبية الباكستانية','Pakistani Rupee',2,true),
+    ('PLN','الزلوتي البولندي','Polish Zloty',2,true),
+    ('QAR','الريال القطري','Qatari Riyal',2,true),
+    ('RUB','الروبل الروسي','Russian Ruble',2,true),
+    ('SAR','الريال السعودي','Saudi Riyal',2,true),
+    ('SEK','الكرونة السويدية','Swedish Krona',2,true),
+    ('SYP','الليرة السورية','Syrian Pound',2,true),
+    ('TND','الدينار التونسي','Tunisian Dinar',3,true),
+    ('TRY','الليرة التركية','Turkish Lira',2,true),
+    ('USD','الدولار الأمريكي','US Dollar',2,true),
+    ('YER','الريال اليمني','Yemeni Rial',2,true),
+    ('ZAR','الراند الجنوب أفريقي','South African Rand',2,true)
+ON CONFLICT(currency_code) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS company_currencies (
     company_id uuid NOT NULL REFERENCES companies(company_id),
     currency_code char(3) NOT NULL REFERENCES currencies(currency_code),
