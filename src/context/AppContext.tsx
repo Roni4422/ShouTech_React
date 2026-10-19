@@ -99,6 +99,7 @@ interface AppContextType {
   syncCloudBackups: () => void;
   
   addUser: (user: Omit<User, 'id'>) => void;
+  updateUser: (id: string, changes: Partial<Pick<User, 'fullName' | 'fullNameEn' | 'email' | 'role' | 'active' | 'permissions'>>) => boolean;
   updateChequeStatus: (id: string, status: 'under_collection' | 'collected' | 'returned') => void;
   addCheque: (cheque: Omit<ChequeRecord, 'id'>) => void;
   
@@ -833,10 +834,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addUser = (userData: Omit<User, 'id'>) => {
-    const newUser: User = { ...userData, id: `usr-${Date.now()}` };
+    const normalizedUsername = userData.username.trim().toLocaleLowerCase();
+    if (!normalizedUsername || users.some(user => user.username.trim().toLocaleLowerCase() === normalizedUsername)) {
+      showToast('User was not created: username is required or already exists.');
+      return;
+    }
+    if (userData.role === 'admin' && !userData.permissions.includes('all')) {
+      showToast('Administrator role requires the explicit all-permissions grant.');
+      return;
+    }
+    const newUser: User = {
+      ...userData,
+      username: userData.username.trim(),
+      fullName: userData.fullName.trim(),
+      fullNameEn: userData.fullNameEn.trim() || userData.fullName.trim(),
+      email: userData.email.trim(),
+      id: `usr-${Date.now()}`
+    };
     setUsers(prev => [...prev, newUser]);
-    recordAuditEvent('CREATE_USER', 'SecurityGuard', newUser.username);
-    showToast(`${translate('settings.addUser')}: ${newUser.username}`);
+    recordAuditEvent('CREATE_USER', 'UserAdministration', newUser.username);
+    showToast(`User created in the current application session: ${newUser.username}`);
+  };
+
+  const updateUser = (
+    id: string,
+    changes: Partial<Pick<User, 'fullName' | 'fullNameEn' | 'email' | 'role' | 'active' | 'permissions'>>
+  ): boolean => {
+    const target = users.find(user => user.id === id);
+    if (!target) {
+      showToast('User update failed: record not found.');
+      return false;
+    }
+    if (currentUser?.id === id && changes.active === false) {
+      showToast('You cannot deactivate the currently signed-in user.');
+      return false;
+    }
+    const removesAdmin = target.role === 'admin' &&
+      ((changes.role !== undefined && changes.role !== 'admin') || changes.active === false);
+    if (removesAdmin && users.filter(user => user.role === 'admin' && user.active).length <= 1) {
+      showToast('The last active administrator cannot be demoted or deactivated.');
+      return false;
+    }
+    if (changes.role === 'admin' && changes.permissions && !changes.permissions.includes('all')) {
+      showToast('Administrator role requires the explicit all-permissions grant.');
+      return false;
+    }
+    setUsers(prev => prev.map(user => user.id === id ? { ...user, ...changes } : user));
+    recordAuditEvent('UPDATE_USER', 'UserAdministration', target.username);
+    showToast(`User updated in the current application session: ${target.username}`);
+    return true;
   };
 
   const updateChequeStatus = (id: string, status: 'under_collection' | 'collected' | 'returned') => {
@@ -922,6 +968,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         restoreBackup,
         syncCloudBackups,
         addUser,
+        updateUser,
         updateChequeStatus,
         addCheque,
         isPreviewOpen,

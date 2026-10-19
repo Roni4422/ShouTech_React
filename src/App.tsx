@@ -20,6 +20,7 @@ import { JournalView } from './components/views/JournalView';
 import { ReportsView } from './components/views/ReportsView';
 import { BackupView } from './components/views/BackupView';
 import { SettingsView } from './components/views/SettingsView';
+import { UsersView } from './components/views/UsersView';
 import { AboutView } from './components/views/AboutView';
 import { NativeEngineView } from './components/views/NativeEngineView';
 import { SecurityCenterView } from './components/views/SecurityCenterView';
@@ -65,9 +66,8 @@ function renderWindowView(type: ActiveWindow) {
     case 'backup':
     case 'dataExchange':
       return <BackupView />;
-    case 'settings':
-    case 'users':
-      return <SettingsView />;
+    case 'settings': return <SettingsView />;
+    case 'users': return <UsersView />;
     case 'nativeEngine': return <NativeEngineView />;
     case 'about':
     case 'license':

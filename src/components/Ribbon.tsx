@@ -35,7 +35,8 @@ export const Ribbon: React.FC = () => {
     { id: 'securityCenter', label: 'الأمان العسكري', icon: ShieldCheck },
     { id: 'tools', label: 'الأدوات', icon: Wrench },
     { id: 'nativeEngine', label: 'C/C# Engine', icon: Cpu },
-    { id: 'settings', label: 'الصلاحيات', icon: Settings },
+    { id: 'users', label: 'إدارة المستخدمين', icon: Users },
+    { id: 'settings', label: 'الإعدادات', icon: Settings },
   ];
 
   return (
