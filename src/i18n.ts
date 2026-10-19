@@ -284,6 +284,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'لم يُحفظ في قاعدة البيانات؛ تكامل API لهذه العملية لم يكتمل',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'الاسم الكامل للمسؤول الأول',
     'setup.adminUsername': 'اسم مستخدم المسؤول الأول',
@@ -551,6 +552,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'Not saved to the database; API integration for this operation is pending',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'Initial administrator full name',
     'setup.adminUsername': 'Initial administrator username',
@@ -580,6 +582,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'Non enregistré dans la base de données ; l’intégration API de cette opération est en attente',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'Nom complet de l’administrateur initial',
     'setup.adminUsername': 'Identifiant de l’administrateur initial',
@@ -609,6 +612,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'Veritabanına kaydedilmedi; bu işlem için API entegrasyonu beklemede',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'İlk yönetici tam adı',
     'setup.adminUsername': 'İlk yönetici kullanıcı adı',
@@ -649,6 +653,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'Nicht in der Datenbank gespeichert; die API-Integration für diesen Vorgang steht noch aus',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'Vollständiger Name des ersten Administrators',
     'setup.adminUsername': 'Benutzername des ersten Administrators',
@@ -689,6 +694,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'No se guardó en la base de datos; la integración de API para esta operación está pendiente',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'Nombre completo del administrador inicial',
     'setup.adminUsername': 'Usuario del administrador inicial',
@@ -729,6 +735,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'Не сохранено в базе данных; интеграция API для этой операции ещё не завершена',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'Полное имя первого администратора',
     'setup.adminUsername': 'Имя пользователя первого администратора',
@@ -769,6 +776,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': '未保存到数据库；此操作的 API 集成尚未完成',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': '首位管理员全名',
     'setup.adminUsername': '首位管理员用户名',
@@ -809,6 +817,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'در پایگاه داده ذخیره نشد؛ اتصال API برای این عملیات هنوز تکمیل نشده است',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'نام کامل مدیر اولیه',
     'setup.adminUsername': 'نام کاربری مدیر اولیه',
@@ -849,6 +858,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.company': 'Company',
     'status.database': 'Database',
     'status.role': 'Role',
+    'common.notPersisted': 'ڈیٹابیس میں محفوظ نہیں ہوا؛ اس کارروائی کے لیے API انضمام ابھی مکمل نہیں ہوا',
     'status.license': 'Enterprise Licensed (10 Users)'
     'setup.adminFullName': 'ابتدائی منتظم کا پورا نام',
     'setup.adminUsername': 'ابتدائی منتظم کا صارف نام',
