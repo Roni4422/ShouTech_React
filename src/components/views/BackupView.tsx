@@ -17,7 +17,6 @@ export const BackupView: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string>(backups[0]?.id || '');
   const [backupNote, setBackupNote] = useState('نسخة احتياطية مرآة كاملة للشركة وقواعد البيانات');
   const [targetLocation] = useState<'local'>('local');
-  const [customPath, setCustomPath] = useState(currentCompany.backupLocation || 'D:\\ShouTech_Backups\\Vault\\');
 
   // Filter backups for current company
   const companyBackups = backups.filter(b => !b.companyCode || b.companyCode === currentCompany.code);
