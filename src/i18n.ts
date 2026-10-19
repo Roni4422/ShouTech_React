@@ -288,7 +288,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'الاسم الكامل للمسؤول الأول',
     'setup.adminUsername': 'اسم مستخدم المسؤول الأول',
-    'setup.adminPassword': 'كلمة مرور المسؤول الأول'
+    'setup.adminPassword': 'كلمة مرور المسؤول الأول',
     'window.dashboard': 'لوحة القيادة',
     'window.pos': 'نقطة البيع',
     'window.invoices': 'الفواتير',
@@ -595,7 +595,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'Initial administrator full name',
     'setup.adminUsername': 'Initial administrator username',
-    'setup.adminPassword': 'Initial administrator password'
+    'setup.adminPassword': 'Initial administrator password',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -664,7 +664,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'Nom complet de l’administrateur initial',
     'setup.adminUsername': 'Identifiant de l’administrateur initial',
-    'setup.adminPassword': 'Mot de passe de l’administrateur initial'
+    'setup.adminPassword': 'Mot de passe de l’administrateur initial',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -733,7 +733,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'İlk yönetici tam adı',
     'setup.adminUsername': 'İlk yönetici kullanıcı adı',
-    'setup.adminPassword': 'İlk yönetici parolası'
+    'setup.adminPassword': 'İlk yönetici parolası',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -813,7 +813,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'Vollständiger Name des ersten Administrators',
     'setup.adminUsername': 'Benutzername des ersten Administrators',
-    'setup.adminPassword': 'Passwort des ersten Administrators'
+    'setup.adminPassword': 'Passwort des ersten Administrators',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -893,7 +893,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'Nombre completo del administrador inicial',
     'setup.adminUsername': 'Usuario del administrador inicial',
-    'setup.adminPassword': 'Contraseña del administrador inicial'
+    'setup.adminPassword': 'Contraseña del administrador inicial',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -973,7 +973,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'Полное имя первого администратора',
     'setup.adminUsername': 'Имя пользователя первого администратора',
-    'setup.adminPassword': 'Пароль первого администратора'
+    'setup.adminPassword': 'Пароль первого администратора',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -1053,7 +1053,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': '首位管理员全名',
     'setup.adminUsername': '首位管理员用户名',
-    'setup.adminPassword': '首位管理员密码'
+    'setup.adminPassword': '首位管理员密码',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -1133,7 +1133,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'نام کامل مدیر اولیه',
     'setup.adminUsername': 'نام کاربری مدیر اولیه',
-    'setup.adminPassword': 'گذرواژه مدیر اولیه'
+    'setup.adminPassword': 'گذرواژه مدیر اولیه',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
@@ -1213,7 +1213,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     'status.license': 'Enterprise Licensed (10 Users)',
     'setup.adminFullName': 'ابتدائی منتظم کا پورا نام',
     'setup.adminUsername': 'ابتدائی منتظم کا صارف نام',
-    'setup.adminPassword': 'ابتدائی منتظم کا پاس ورڈ'
+    'setup.adminPassword': 'ابتدائی منتظم کا پاس ورڈ',
     'window.dashboard': 'Dashboard',
     'window.pos': 'Point of Sale',
     'window.invoices': 'Invoices',
