@@ -109,7 +109,7 @@ export const BackupView: React.FC = () => {
             <div className="space-y-1">
               <span className="font-bold text-xs text-white block">تنزيل الملف عبر المتصفح</span>
               <p className="text-[11px] text-gray-300">
-                مسار التخزين الافتراضي: <strong className="text-purple-300 font-mono">%LocalAppData%\ShouTech\Backups</strong> مع تفضيلات المستخدم وقواعد البيانات.
+                ينزّل المتصفح ملف JSON إلى مجلد التنزيلات أو الموقع الذي يحدده المستخدم. لا يمكن للتطبيق الكتابة مباشرة إلى مسار محلي محدد.
               </p>
               <div className="text-[10px] text-gray-400 font-mono pt-1">
                 الملف الناتج غير مشفّر؛ احفظه في موقع آمن ولا تشاركه مع غير المخوّلين.
