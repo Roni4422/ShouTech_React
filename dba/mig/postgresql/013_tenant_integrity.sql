@@ -51,6 +51,6 @@ CREATE TRIGGER trg_pos_transaction_tenant BEFORE INSERT OR UPDATE OF company_id,
 DROP TRIGGER IF EXISTS trg_order_tenant ON commercial_orders;
 CREATE TRIGGER trg_order_tenant BEFORE INSERT OR UPDATE OF company_id, party_id, source_document_id ON commercial_orders FOR EACH ROW EXECUTE FUNCTION shouttech_validate_commercial_tenant();
 DROP TRIGGER IF EXISTS trg_order_line_tenant ON commercial_order_lines;
-CREATE TRIGGER trg_order_line_tenant BEFORE INSERT OR UPDATE OF order_id, product_id ON commercial_order_lines FOR EACH ROW EXECUTE FUNCTION shouttech_validate_commercial_tenant();
+CREATE TRIGGER trg_order_line_tenant BEFORE INSERT OR UPDATE ON commercial_order_lines FOR EACH ROW EXECUTE FUNCTION shouttech_validate_commercial_tenant();
 DROP TRIGGER IF EXISTS trg_bank_account_tenant ON bank_accounts;
 CREATE TRIGGER trg_bank_account_tenant BEFORE INSERT OR UPDATE OF company_id, gl_account_id ON bank_accounts FOR EACH ROW EXECUTE FUNCTION shouttech_validate_commercial_tenant();
