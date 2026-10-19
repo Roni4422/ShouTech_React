@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   KeyRound, User, Lock, Building, ArrowLeft, ShieldCheck, 
-  AlertCircle, ShieldAlert, Cpu 
+  AlertCircle, ShieldAlert 
 } from 'lucide-react';
 
 export const LoginModal: React.FC = () => {
@@ -14,10 +14,9 @@ export const LoginModal: React.FC = () => {
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (appStage !== 'login') return null;
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
