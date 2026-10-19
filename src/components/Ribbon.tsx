@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const Ribbon: React.FC = () => {
-  const { activeWindow, openWindow, translate, createBackup, showToast } = useApp();
+  const { activeWindow, openWindow, translate, createBackup } = useApp();
 
   const tabs: { id: ActiveWindow; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'dashboard', label: 'لوحة القيادة', icon: LayoutDashboard },
@@ -86,10 +86,7 @@ export const Ribbon: React.FC = () => {
             {/* Group 2: الباركود والأسعار */}
             <div className="flex flex-col items-center pe-3 border-e border-[#444444]">
               <div className="flex items-center gap-1.5">
-                <button onClick={() => showToast('طباعة وتصميم الباركود للأصناف')} className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-white/10 text-[11px] gap-1 min-w-[56px]">
-                  <Printer className="w-5 h-5 text-emerald-400" />
-                  <span>طباعة باركود</span>
-                </button>
+                
                 <button onClick={() => openWindow('materials')} className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-white/10 text-[11px] gap-1 min-w-[56px]">
                   <Calculator className="w-5 h-5 text-purple-400" />
                   <span>قوائم الأسعار</span>
@@ -105,10 +102,7 @@ export const Ribbon: React.FC = () => {
                   <ArrowLeftRight className="w-5 h-5 text-purple-400" />
                   <span>مناقلة مواد</span>
                 </button>
-                <button onClick={() => showToast('بدء التسوية الجردية للمستودع')} className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-white/10 text-[11px] gap-1 min-w-[56px]">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  <span>تسوية جردية</span>
-                </button>
+                
               </div>
               <span className="text-[9px] text-gray-400 mt-1">الجرد والمناقلات</span>
             </div>
