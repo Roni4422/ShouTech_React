@@ -94,7 +94,7 @@ interface AppContextType {
   
   transferStock: (sourceWhId: number, targetWhId: number, materialCode: string, qty: number, reason: string) => boolean;
   
-  createBackup: (note?: string, target?: 'local' | 'cloud_vault' | 'custom_path', trigger?: 'session_end' | 'session_start' | 'manual' | 'daily_scheduled') => BackupRecord;
+  createBackup: (note?: string, target?: 'local', trigger?: 'session_end' | 'session_start' | 'manual' | 'daily_scheduled') => BackupRecord;
   restoreBackup: (id: string) => boolean;
   syncCloudBackups: () => void;
   
@@ -760,78 +760,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const createBackup = (
-    note?: string, 
-    target: 'local' | 'cloud_vault' | 'custom_path' = 'cloud_vault',
+    note?: string,
+    target: 'local' = 'local',
     trigger: 'session_end' | 'session_start' | 'manual' | 'daily_scheduled' = 'manual'
   ): BackupRecord => {
-    const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
-    const checksum = pseudoSha256(`MIRROR_${Date.now()}_${currentCompany.code}_${materials.length}_${accounts.length}`);
-    
-    // 100% Mirror Snapshot of workstation state
+    const createdAt = new Date();
+    const timestamp = createdAt.toISOString().replace(/[-:T]/g, '').slice(0, 14);
     const snapshotData = {
-      timestamp: new Date().toISOString(),
+      timestamp: createdAt.toISOString(),
       version: '10.6.0',
       company: currentCompany,
-      preferences: {
-        language,
-        theme,
-        windowLayout
-      },
+      preferences: { language, theme, windowLayout },
       users,
       currentUser,
-      database: {
-        materials,
-        warehouses,
-        accounts,
-        invoices,
-        journals,
-        movements,
-        cheques,
-        costCenters,
-        parties
-      },
-      securityState: {
-        auditLogs: auditLogs.slice(0, 20),
-        sha256ChainIntact: true
-      }
+      database: { materials, warehouses, accounts, invoices, journals, movements, cheques, costCenters, parties },
+      securityState: { auditLogs: auditLogs.slice(0, 20) }
     };
-
+    const archive = { format: 'ShouTech ERP JSON Snapshot', schemaVersion: 1, createdAt: createdAt.toISOString(), companyCode: currentCompany.code, snapshotData };
+    const archiveText = JSON.stringify(archive, null, 2);
+    const archiveBlob = new Blob([archiveText], { type: 'application/json;charset=utf-8' });
+    const filename = 'ShouTech_' + currentCompany.code + '_' + timestamp + '.stbackup.json';
+    const downloadUrl = URL.createObjectURL(archiveBlob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = downloadUrl;
+    downloadLink.download = filename;
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    try { downloadLink.click(); }
+    finally { downloadLink.remove(); window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000); }
+    const bytes = archiveBlob.size;
+    const sizeLabel = bytes < 1048576 ? (bytes / 1024).toFixed(1) + ' KB' : (bytes / 1048576).toFixed(2) + ' MB';
     const newRecord: BackupRecord = {
-      id: `bkp-${Date.now()}`,
-      name: `STBK2_MIRROR_${target === 'cloud_vault' ? 'CLOUD' : 'LOCAL'}_${timestamp}.stbk2`,
-      date: new Date().toLocaleString(),
-      size: `${(15.2 + Math.random() * 0.4).toFixed(1)} MB`,
-      status: 'Valid',
-      note: note || `نسخة مرآة كاملة للشركة (${trigger === 'session_end' ? 'نهاية العمل' : trigger === 'session_start' ? 'بداية اليوم' : 'يدوية'})`,
+      id: 'bkp-' + Date.now(),
+      name: filename,
+      date: createdAt.toLocaleString(),
+      size: sizeLabel,
+      status: 'Not checked',
+      note: note?.trim() || ('JSON snapshot download (' + trigger + ') — not encrypted; no cloud upload'),
       type: 'MIRROR_FULL',
       storageTarget: target,
-      storagePath: target === 'custom_path' 
-        ? (currentCompany.backupLocation || 'D:\\ShouTech_Backups\\')
-        : target === 'local' 
-          ? '%LocalAppData%\\ShouTech\\Backups\\' 
-          : `https://vault.shoutech-enterprise.com/backups/COMP_${currentCompany.code}/`,
+      storagePath: 'Browser download; choose the save location in your browser',
       companyCode: currentCompany.code,
       triggerEvent: trigger,
-      encryptionAlgorithm: 'AES-256-GCM / Argon2id (Military FIPS 140-3)',
-      sha256Checksum: checksum,
       snapshotData
     };
-
-    setBackups(prev => {
-      let updated = [newRecord, ...prev];
-      // Enforce strict Max 3 rolling copies in the cloud server for this company
-      if (target === 'cloud_vault') {
-        const companyCloudBackups = updated.filter(b => b.storageTarget === 'cloud_vault' && b.companyCode === currentCompany.code);
-        if (companyCloudBackups.length > 3) {
-          const keepList = companyCloudBackups.slice(0, 3);
-          updated = updated.filter(b => b.storageTarget !== 'cloud_vault' || b.companyCode !== currentCompany.code || keepList.some(k => k.id === b.id));
-        }
-      }
-      return updated;
-    });
-
-    recordAuditEvent('CREATE_MIRROR_BACKUP', 'CloudVault', newRecord.name);
-    showToast(`${translate('backup.success')}: ${newRecord.name} (حفظ في ${target === 'cloud_vault' ? 'الخادم السحابي' : 'المحلي'})`);
+    setBackups(prev => [newRecord, ...prev]);
+    recordAuditEvent('EXPORT_JSON_BACKUP', 'Backup', filename);
+    showToast('Backup download started: ' + filename + '. This JSON file is not encrypted or cloud-synced.');
     return newRecord;
   };
 
