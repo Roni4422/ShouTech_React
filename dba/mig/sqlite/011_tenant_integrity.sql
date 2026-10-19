@@ -230,3 +230,24 @@ BEGIN
     SELECT 1 FROM chart_of_accounts a WHERE a.account_id=NEW.gl_account_id AND a.company_id=NEW.company_id
   ) THEN RAISE(ABORT, 'Bank GL account must belong to the same company') END;
 END;
+
+CREATE TRIGGER IF NOT EXISTS trg_product_master_tenant_insert
+BEFORE INSERT ON products
+BEGIN
+  SELECT CASE WHEN NOT EXISTS (
+    SELECT 1 FROM product_categories c WHERE c.category_id=NEW.category_id AND c.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'Product category must belong to the same company') END;
+  SELECT CASE WHEN NOT EXISTS (
+    SELECT 1 FROM units_of_measure u WHERE u.uom_id=NEW.primary_uom_id AND u.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'Product unit must belong to the same company') END;
+END;
+CREATE TRIGGER IF NOT EXISTS trg_product_master_tenant_update
+BEFORE UPDATE OF company_id, category_id, primary_uom_id ON products
+BEGIN
+  SELECT CASE WHEN NOT EXISTS (
+    SELECT 1 FROM product_categories c WHERE c.category_id=NEW.category_id AND c.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'Product category must belong to the same company') END;
+  SELECT CASE WHEN NOT EXISTS (
+    SELECT 1 FROM units_of_measure u WHERE u.uom_id=NEW.primary_uom_id AND u.company_id=NEW.company_id
+  ) THEN RAISE(ABORT, 'Product unit must belong to the same company') END;
+END;
