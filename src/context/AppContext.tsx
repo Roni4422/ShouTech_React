@@ -406,46 +406,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [theme]);
 
-  useEffect(() => {
-    localStorage.setItem('shoutech_materials', JSON.stringify(materials));
-  }, [materials]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_warehouses', JSON.stringify(warehouses));
-  }, [warehouses]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_accounts', JSON.stringify(accounts));
-  }, [accounts]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_invoices', JSON.stringify(invoices));
-  }, [invoices]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_journals', JSON.stringify(journals));
-  }, [journals]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_movements', JSON.stringify(movements));
-  }, [movements]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_backups', JSON.stringify(backups));
-  }, [backups]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_cheques', JSON.stringify(cheques));
-  }, [cheques]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_audit', JSON.stringify(auditLogs));
-  }, [auditLogs]);
-
-  useEffect(() => {
-    localStorage.setItem('shoutech_users', JSON.stringify(users));
-  }, [users]);
-
   const setLanguage = (lang: LanguageCode) => setLanguageState(lang);
   const setTheme = (mode: ThemeMode) => setThemeState(mode);
 
@@ -457,6 +417,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const translate = (key: string) => t(key, language);
+
+  const showLocalOnlyToast = (message: string) => {
+    showToast(message + ' — ' + translate('common.notPersisted'));
+  };
 
   // Legacy audit chaining uses a non-cryptographic digest and is not tamper-proof.
   const recordAuditEvent = (action: string, module: string, recordId: string) => {
@@ -547,8 +511,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetSecurityLockout = () => {
-    setSecurityStatus(prev => ({ ...prev, failedLoginAttempts: 0, lockoutActive: false }));
-    showToast('Security lockout cleared by Administrator.');
+    showToast('Security lockout cannot be cleared in the browser; use the server-side recovery workflow.');
   };
 
   const logout = async () => {
@@ -574,7 +537,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newMat: Material = { ...mat, id: newId };
     setMaterials(prev => [newMat, ...prev]);
     recordAuditEvent('CREATE_MATERIAL', 'Inventory', newMat.code);
-    showToast(translate('mat.saveSuccess'));
+    showLocalOnlyToast(translate('mat.saveSuccess'));
   };
 
   const updateMaterial = (id: number, mat: Partial<Material>) => {
@@ -586,7 +549,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteMaterial = (id: number) => {
     setMaterials(prev => prev.filter(m => m.id !== id));
     recordAuditEvent('DELETE_MATERIAL', 'Inventory', id.toString());
-    showToast(translate('common.delete'));
+    showLocalOnlyToast(translate('common.delete'));
   };
 
   const addWarehouse = (wh: Omit<Warehouse, 'id'>) => {
@@ -594,19 +557,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newWh: Warehouse = { ...wh, id: newId };
     setWarehouses(prev => [...prev, newWh]);
     recordAuditEvent('CREATE_WAREHOUSE', 'Inventory', newWh.code);
-    showToast(translate('whs.title') + ': ' + newWh.nameAr);
+    showLocalOnlyToast(translate('whs.title') + ': ' + newWh.nameAr);
   };
 
   const updateWarehouse = (id: number, wh: Partial<Warehouse>) => {
     setWarehouses(prev => prev.map(w => w.id === id ? { ...w, ...wh } : w));
     recordAuditEvent('UPDATE_WAREHOUSE', 'Inventory', id.toString());
-    showToast(translate('common.save'));
+    showLocalOnlyToast(translate('common.save'));
   };
 
   const addAccount = (acc: Account) => {
     setAccounts(prev => [...prev, acc]);
     recordAuditEvent('CREATE_ACCOUNT', 'GeneralLedger', acc.code);
-    showToast(translate('coa.addAccount') + ': ' + acc.nameAr);
+    showLocalOnlyToast(translate('coa.addAccount') + ': ' + acc.nameAr);
   };
 
   const saveInvoice = (inv: Omit<Invoice, 'id'>): number => {
@@ -614,7 +577,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newInv: Invoice = { ...inv, id: newId };
     setInvoices(prev => [newInv, ...prev]);
     recordAuditEvent('SAVE_INVOICE_DRAFT', 'Invoices', newInv.docNo);
-    showToast(translate('inv.saveDraft') + ': ' + newInv.docNo);
+    showLocalOnlyToast(translate('inv.saveDraft') + ': ' + newInv.docNo);
     return newId;
   };
 
@@ -686,7 +649,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setInvoices(prev => prev.map(i => i.id === id ? { ...i, status: 'Posted', postedBy: currentUser?.username || 'unknown' } : i));
     recordAuditEvent('POST_INVOICE_LEDGER', 'Invoices', inv.docNo);
-    showToast(translate('inv.postInvoice') + ': ' + inv.docNo);
+    showLocalOnlyToast(translate('inv.postInvoice') + ': ' + inv.docNo);
     return true;
   };
 
@@ -752,7 +715,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reversalReason: cleanReason
     } : i));
     recordAuditEvent('REVERSE_INVOICE', 'Invoices', target.docNo + ' -> ' + reversalDocNo + '; reason: ' + cleanReason);
-    showToast(translate('inv.reverseSuccess'));
+    showLocalOnlyToast(translate('inv.reverseSuccess'));
     return true;
   };
 
@@ -761,7 +724,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newJrn: JournalEntry = { ...jrn, id: newId };
     setJournals(prev => [newJrn, ...prev]);
     recordAuditEvent('SAVE_JOURNAL_DRAFT', 'GeneralLedger', newJrn.docNo);
-    showToast(translate('common.save') + ': ' + newJrn.docNo);
+    showLocalOnlyToast(translate('common.save') + ': ' + newJrn.docNo);
     return newId;
   };
 
@@ -815,7 +778,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } : j));
 
     recordAuditEvent('POST_JOURNAL_LEDGER', 'GeneralLedger', jrn.docNo);
-    showToast(translate('jrn.postJournal') + ': ' + jrn.docNo);
+    showLocalOnlyToast(translate('jrn.postJournal') + ': ' + jrn.docNo);
     return true;
   };
 
@@ -849,7 +812,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setMovements(prev => [move, ...prev]);
     recordAuditEvent('STOCK_TRANSFER', 'Inventory', `${docNo} (${mat.code} qty ${qty})`);
-    showToast(translate('whs.transferSuccess'));
+    showLocalOnlyToast(translate('whs.transferSuccess'));
     return true;
   };
 
@@ -1006,14 +969,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateChequeStatus = (id: string, status: 'under_collection' | 'collected' | 'returned') => {
     setCheques(prev => prev.map(c => c.id === id ? { ...c, status } : c));
     recordAuditEvent('UPDATE_CHEQUE_STATUS', 'Securities', `${id} -> ${status}`);
-    showToast('Cheque status updated');
+    showLocalOnlyToast(translate('cheque.title'));
   };
 
   const addCheque = (cheque: Omit<ChequeRecord, 'id'>) => {
     const newCheque: ChequeRecord = { ...cheque, id: `chq-${Date.now()}` };
     setCheques(prev => [newCheque, ...prev]);
     recordAuditEvent('REGISTER_CHEQUE', 'Securities', newCheque.chequeNo);
-    showToast(`Cheque registered: ${newCheque.chequeNo}`);
+    showLocalOnlyToast(translate('cheque.title') + ': ' + newCheque.chequeNo);
   };
 
   return (
