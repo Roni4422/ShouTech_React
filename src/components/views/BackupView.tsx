@@ -140,7 +140,7 @@ export const BackupView: React.FC = () => {
               <Plus className="w-4 h-4 text-emerald-400" />
               <span>تنزيل لقطة JSON للشركة النشطة</span>
             </span>
-   </button>
+   
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
