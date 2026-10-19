@@ -62,7 +62,7 @@ export const UsersView: React.FC = () => {
         <div>
           <div className="mb-2 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-sky-400"><ShieldCheck className="h-4 w-4" /> Security & access governance</div>
           <h1 className="text-2xl font-bold">User administration</h1>
-          <p className="mt-1 max-w-2xl text-sm text-gray-400">Manage user profiles, access roles and account availability for this application session.</p>
+          <p className="mt-1 max-w-2xl text-sm text-gray-400">Manage user profiles, access roles and account availability. Profile changes are cached in this browser only; this screen is not a production identity provider.</p>
         </div>
         <button onClick={() => { setShowForm(value => !value); setFormError(''); }} disabled={currentUser?.role !== 'admin'} className="inline-flex items-center justify-center gap-2 rounded-md bg-[#0078D4] px-4 py-2.5 text-sm font-semibold hover:bg-[#1687dc] disabled:cursor-not-allowed disabled:opacity-40"><UserPlus className="h-4 w-4" /> Create user</button>
       </header>
@@ -103,7 +103,7 @@ export const UsersView: React.FC = () => {
           </tbody>
         </table>
       </div>
-      <p className="mt-4 text-xs leading-5 text-amber-200/80"><strong>Implementation boundary:</strong> this screen updates shared in-memory application state and audit events. It does not provision credentials or persist accounts to a server/database; those require authenticated backend and database integration.</p>
+      <p className="mt-4 text-xs leading-5 text-amber-200/80"><strong>Security boundary:</strong> profile metadata is stored in this browser's local storage and can be modified by the browser user. This does not provision credentials or persist accounts to a server/database. Do not use this client-side profile cache as production authorization; a trusted authentication API and database enforcement are still required.</p>
     </section>
   );
 };
