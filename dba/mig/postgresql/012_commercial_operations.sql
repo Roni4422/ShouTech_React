@@ -79,7 +79,7 @@ INSERT INTO currencies(currency_code, name_ar, name_en, minor_units, is_active) 
     ('IQD','الدينار العراقي','Iraqi Dinar',3,true),
     ('ILS','الشيكل الإسرائيلي الجديد','Israeli New Shekel',2,true),
     ('JOD','الدينار الأردني','Jordanian Dinar',3,true),
-    ('JPY','الين الياباني','Japanese Yen',2,true),
+    ('JPY','الين الياباني','Japanese Yen',0,true),
     ('KWD','الدينار الكويتي','Kuwaiti Dinar',3,true),
     ('LBP','الليرة اللبنانية','Lebanese Pound',2,true),
     ('LYD','الدينار الليبي','Libyan Dinar',3,true),
