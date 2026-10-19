@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { apiClient } from '../services/apiClient';
 import { useApp } from '../context/AppContext';
 import { Company } from '../types';
 import { ACCOUNTING_TREES, AccountingTreeTemplate } from '../data/accountingTrees';
@@ -10,8 +11,8 @@ import {
 
 export const CompanyModal: React.FC = () => {
   const { 
-    appStage, companies, currentCompany, selectCompanyAndProceed, 
-    addCompany, translate, showToast, lockWorkstation 
+    appStage, companies, selectCompanyAndProceed, 
+    refreshCompanies, translate, showToast, lockWorkstation, language 
   } = useApp();
 
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(companies[0] || null);
@@ -28,6 +29,10 @@ export const CompanyModal: React.FC = () => {
   const [newTaxId, setNewTaxId] = useState('');
   const [newVat, setNewVat] = useState('');
   const [newCity, setNewCity] = useState('');
+  const [adminFullName, setAdminFullName] = useState('');
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isCreatingCompany, setIsCreatingCompany] = useState(false);
 
   // Backup location preferences for the new company
   const [backupLocationType, setBackupLocationType] = useState<'local_appdata' | 'custom'>('local_appdata');
@@ -35,6 +40,16 @@ export const CompanyModal: React.FC = () => {
   const [autoCloudBackup, setAutoCloudBackup] = useState(false);
 
   const selectedTree = ACCOUNTING_TREES.find(t => t.id === selectedTreeId) || ACCOUNTING_TREES[0];
+
+  useEffect(() => {
+    if (companies.length > 0) {
+      if (!selectedCompany || !companies.some(company => company.id === selectedCompany.id)) setSelectedCompany(companies[0]);
+      setShowAddCompany(false);
+    } else {
+      setSelectedCompany(null);
+      setShowAddCompany(true);
+    }
+  }, [companies]);
 
   if (appStage !== 'company_select') return null;
 
@@ -46,50 +61,54 @@ export const CompanyModal: React.FC = () => {
     selectCompanyAndProceed(selectedCompany);
   };
 
-  const handleRegisterCompany = (e: React.FormEvent) => {
+  const handleRegisterCompany = async (e: React.FormEvent) => {
     e.preventDefault();
     const normalizedCode = newCode.trim().toLocaleUpperCase();
-    if (!normalizedCode || !newNameAr.trim()) {
-      showToast('رمز الشركة واسمها بالعربية حقول إلزامية');
+    if (companies.length > 0) {
+      showToast('Additional company creation is not enabled in this API phase.');
       return;
     }
-    if (companies.some(company => company.code.trim().toLocaleUpperCase() === normalizedCode)) {
-      showToast('رمز الشركة مستخدم بالفعل؛ اختر رمزاً فريداً');
+    if (!normalizedCode || !newNameAr.trim() || !newNameEn.trim() ||
+        !adminFullName.trim() || !adminUsername.trim() || adminPassword.length < 12) {
+      showToast('Complete the company details and provide an administrator password of at least 12 characters.');
       return;
     }
     if (backupLocationType === 'custom' && !customBackupPath.trim()) {
-      showToast('أدخل مسار النسخ المفضل أو اختر المسار الافتراضي');
+      showToast('Enter a backup path or choose the default option.');
       return;
     }
 
-    const chosenBackupLoc = backupLocationType === 'local_appdata' 
-      ? '%LocalAppData%\\ShouTech\\Backups\\' 
-      : customBackupPath;
-
-    const created: Omit<Company, 'id'> = {
-      code: normalizedCode,
-      name: newNameAr.trim(),
-      nameEn: newNameEn.trim() || newNameAr.trim(),
-      commercialName: newCommercialName.trim() || newNameAr.trim(),
-      taxId: newTaxId.trim(),
-      commercialRegister: newCommercialRegister.trim(),
-      vatNumber: newVat.trim(),
-      address: newCity.trim(),
-      phone: newPhone.trim(),
-      currency: selectedTree.currency,
-      database: `غير منشأة — SQLite (${normalizedCode}_${selectedTree.code}.db)`, 
-      isDefault: false,
-      accountingTreeTemplateId: selectedTreeId,
-      databaseType: 'sqlite',
-      backupLocation: chosenBackupLoc,
-      autoCloudBackup: autoCloudBackup,
-      maxCloudBackups: 3
-    };
-
-    addCompany(created);
-    setSelectedCompany(null);
-    setShowAddCompany(false);
-    showToast(`تم حفظ سجل الشركة محلياً: ${newNameAr.trim()}. لم تُنشأ قاعدة بيانات أو يُستورد دليل الحسابات أو يُفعّل النسخ السحابي.`);
+    setIsCreatingCompany(true);
+    try {
+      await apiClient.createInitialCompany({
+        companyCode: normalizedCode,
+        companyNameAr: newNameAr.trim(),
+        companyNameEn: newNameEn.trim(),
+        adminUsername: adminUsername.trim(),
+        adminPassword,
+        adminFullName: adminFullName.trim(),
+        phone: newPhone.trim(),
+        address: newCity.trim(),
+        commercialRegistration: newCommercialRegister.trim(),
+        currencyCode: selectedTree.currency,
+        languageCode: language
+      });
+      const updatedCompanies = await refreshCompanies();
+      const created = updatedCompanies.find(company => company.code.toLocaleUpperCase() === normalizedCode);
+      if (!created) {
+        showToast('The server accepted setup, but the company could not be reloaded. Refresh the company list before continuing.');
+        return;
+      }
+      setSelectedCompany(created);
+      setShowAddCompany(false);
+      setAdminPassword('');
+      showToast('Company and initial administrator were saved by the server. Tax, accounting-template and backup preferences are not yet persisted.');
+      selectCompanyAndProceed(created);
+    } catch {
+      showToast('Company setup failed. Check API availability, database migrations, and the setup response.');
+    } finally {
+      setIsCreatingCompany(false);
+    }
   };
 
   return (
@@ -118,7 +137,7 @@ export const CompanyModal: React.FC = () => {
           </div>
 
           <button
-            onClick={() => setShowAddCompany(!showAddCompany)}
+            onClick={() => setShowAddCompany(!showAddCompany)} disabled={companies.length > 0}
             className="px-3 py-1.5 bg-[#2A2A2A] hover:bg-[#353535] border border-white/20 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <Plus className="w-3.5 h-3.5 text-cyan-400" />
@@ -143,6 +162,24 @@ export const CompanyModal: React.FC = () => {
                 >
                   <X className="w-4 h-4" />
                 </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 border-b border-white/10 pb-3">
+                <label className="block">
+                  <span className="block text-[11px] font-semibold text-gray-400 mb-1">{translate('setup.adminFullName')}</span>
+                  <input value={adminFullName} onChange={e => setAdminFullName(e.target.value)} required maxLength={200}
+                    className="w-full px-2.5 py-2 bg-[#1A1A1A] border border-white/15 rounded text-xs text-white" />
+                </label>
+                <label className="block">
+                  <span className="block text-[11px] font-semibold text-gray-400 mb-1">{translate('setup.adminUsername')}</span>
+                  <input value={adminUsername} onChange={e => setAdminUsername(e.target.value)} required maxLength={100}
+                    autoComplete="username" className="w-full px-2.5 py-2 bg-[#1A1A1A] border border-white/15 rounded text-xs text-white" />
+                </label>
+                <label className="block col-span-2">
+                  <span className="block text-[11px] font-semibold text-gray-400 mb-1">{translate('setup.adminPassword')}</span>
+                  <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} required minLength={12} maxLength={1024}
+                    autoComplete="new-password" className="w-full px-2.5 py-2 bg-[#1A1A1A] border border-white/15 rounded text-xs text-white" />
+                </label>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -343,10 +380,11 @@ export const CompanyModal: React.FC = () => {
                 </button>
                 <button
                   type="submit"
+                  disabled={isCreatingCompany}
                   className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 rounded-lg text-xs font-bold text-white shadow flex items-center gap-1.5 transition-all"
                 >
                   <Check className="w-3.5 h-3.5" />
-                  <span>موافق (تأسيس وحفظ)</span>
+                  <span>{isCreatingCompany ? 'Creating…' : translate('common.save')}</span>
                 </button>
               </div>
             </form>
