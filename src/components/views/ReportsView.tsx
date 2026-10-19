@@ -16,6 +16,20 @@ export const ReportsView: React.FC = () => {
   const [fromDate, setFromDate] = useState('2026-01-01');
   const [toDate, setToDate] = useState('2026-12-31');
 
+  const accountBalanceRows = accounts.map(account => {
+    const balance = Number.isFinite(account.balance) ? Number(account.balance) : 0;
+    const normalDebit = account.type === 'Asset' || account.type === 'Expense';
+    const signedDebit = normalDebit ? balance : -balance;
+    return {
+      account,
+      debit: Math.max(0, signedDebit),
+      credit: Math.max(0, -signedDebit)
+    };
+  });
+  const displayedDebitTotal = accountBalanceRows.reduce((total, row) => total + row.debit, 0);
+  const displayedCreditTotal = accountBalanceRows.reduce((total, row) => total + row.credit, 0);
+  const displayedDifference = displayedDebitTotal - displayedCreditTotal;
+
   const exportCSV = (data: Array<Record<string, string | number | boolean | null | undefined>>, filename: string) => {
     if (data.length === 0) {
       showToast('Export unavailable: this report contains no rows.');
@@ -186,11 +200,7 @@ export const ReportsView: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#303030]">
-                  {accounts.map(acc => {
-                    const isDebit = acc.type === 'Asset' || acc.type === 'Expense';
-                    const debit = isDebit ? acc.balance : 0;
-                    const credit = !isDebit ? acc.balance : 0;
-                    return (
+                  {accountBalanceRows.map(({ account: acc, debit, credit }) => (
                       <tr key={acc.code} className="hover:bg-white/5">
                         <td className="py-2.5 px-3 font-mono text-cyan-400 font-bold">{acc.code}</td>
                         <td className="py-2.5 px-3">
@@ -205,8 +215,18 @@ export const ReportsView: React.FC = () => {
                           {credit > 0 ? credit.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-'}
                         </td>
                       </tr>
-                    );
-                  })}
+                  ))}
+                  <tr className="border-t-2 border-white/20 bg-[#1A1A1A] font-bold">
+                    <td colSpan={3} className="py-3 px-3 text-white">{translate('reports.displayedTotals')}</td>
+                    <td className="py-3 px-3 text-end font-mono text-white">{displayedDebitTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-3 text-end font-mono text-white">{displayedCreditTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  </tr>
+                  <tr className="bg-[#1A1A1A]">
+                    <td colSpan={3} className="py-2 px-3 text-gray-300">{translate('reports.displayedDifference')}</td>
+                    <td colSpan={2} className={`py-2 px-3 text-end font-mono font-bold ${Math.abs(displayedDifference) < 0.005 ? 'text-amber-300' : 'text-red-300'}`}>
+                      {displayedDifference.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
