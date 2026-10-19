@@ -21,7 +21,6 @@ export const BackupView: React.FC = () => {
 
   // Filter backups for current company
   const companyBackups = backups.filter(b => !b.companyCode || b.companyCode === currentCompany.code);
-  const cloudBackups = companyBackups.filter(b => b.storageTarget === 'cloud_vault');
 
   const handleCreate = (trigger: 'manual' | 'session_end' | 'session_start' = 'manual') => {
     const record = createBackup(backupNote, targetLocation, trigger);
@@ -29,7 +28,7 @@ export const BackupView: React.FC = () => {
   };
 
   const handleRestore = (id: string) => {
-    if (window.confirm('تأكيد استعادة النسخة الاحتياطية المرآة الكاملة؟ سيتم استرجاع كافة بيانات الشركة، قيود اليومية، المواد، الحسابات، والمستخدمين وتفضيلاتهم كما كانت في تاريخ النسخة.')) {
+    if (window.confirm('تأكيد استعادة لقطة محفوظة في جلسة التطبيق الحالية؟ ستتغير بيانات الحالة داخل هذه الجلسة فقط، ولن تتم استعادة ملف مُنزّل أو الكتابة إلى قاعدة بيانات دائمة.')) {
       restoreBackup(id);
     }
   };
@@ -44,13 +43,13 @@ export const BackupView: React.FC = () => {
           </div>
           <div>
             <h1 className="text-sm font-bold text-white flex items-center gap-2">
-              <span>{translate('backup.title')} وإدارة النسخ السحابية المرآة (Disaster Recovery)</span>
+              <span>{translate('backup.title')} وتصدير لقطات البيانات (JSON)</span>
               <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono font-bold">
                 JSON snapshot — not encrypted
               </span>
             </h1>
             <p className="text-[11px] text-gray-400">
-              الشركة الحالية: <strong className="text-white">{currentCompany.name} ({currentCompany.code})</strong> · مسار الحفظ: {currentCompany.backupLocation || '%LocalAppData%\\ShouTech\\Backups'}
+              الشركة الحالية: <strong className="text-white">{currentCompany.name} ({currentCompany.code})</strong> · التنزيل عبر المتصفح؛ الملف غير مشفّر وغير متصل بسحابة
             </p>
           </div>
         </div>
@@ -94,7 +93,7 @@ export const BackupView: React.FC = () => {
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs text-white">النسخ السحابي (غير متصل)</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono font-bold">3 نسخ كحد أقصى</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono font-bold">غير مفعّل</span>
               </div>
               <p className="text-[11px] text-gray-300">
                 لا يوجد تكامل بخادم سحابي في هذا الإصدار؛ لن ندّعي رفع النسخ أو مزامنتها قبل تنفيذ اتصال خادم موثوق.
@@ -109,7 +108,7 @@ export const BackupView: React.FC = () => {
           <div className="p-3.5 bg-[#252526] rounded-xl border border-purple-500/40 flex items-start gap-3">
             <HardDrive className="w-6 h-6 text-purple-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <span className="font-bold text-xs text-white block">موقع النسخ المحلي في %LocalAppData%</span>
+              <span className="font-bold text-xs text-white block">تنزيل الملف عبر المتصفح</span>
               <p className="text-[11px] text-gray-300">
                 مسار التخزين الافتراضي: <strong className="text-purple-300 font-mono">%LocalAppData%\ShouTech\Backups</strong> مع تفضيلات المستخدم وقواعد البيانات.
               </p>
@@ -177,7 +176,7 @@ export const BackupView: React.FC = () => {
 
         </div>
 
-        {/* Backups Table (Local & Cloud Vault Snapshots) */}
+        {/* Session snapshots created during this running session */}
         <div className="bg-[#252526] rounded-xl border border-[#383838] overflow-hidden">
           <div className="p-3 bg-[#1F1F1F] border-b border-[#383838] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
@@ -235,7 +234,7 @@ export const BackupView: React.FC = () => {
                     <td className="p-2.5 text-center font-mono text-gray-300 font-bold">{b.size}</td>
                     <td className="p-2.5 text-center">
                       <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px] flex items-center justify-center gap-1 mx-auto w-fit">
-                        <CheckCircle2 className="w-3 h-3" />
+                        <AlertTriangle className="w-3 h-3" />
                         <span>لم تُفحص</span>
                       </span>
                     </td>
