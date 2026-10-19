@@ -87,7 +87,7 @@ export const CompanyModal: React.FC = () => {
     };
 
     addCompany(created);
-    setSelectedCompany({ ...created, id: `ST-COMP-${Date.now().toString().slice(-3)}` });
+    setSelectedCompany(null);
     setShowAddCompany(false);
     showToast(`تم حفظ سجل الشركة محلياً: ${newNameAr.trim()}. لم تُنشأ قاعدة بيانات أو يُستورد دليل الحسابات أو يُفعّل النسخ السحابي.`);
   };
