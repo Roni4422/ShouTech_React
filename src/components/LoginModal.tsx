@@ -81,7 +81,7 @@ export const LoginModal: React.FC = () => {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs leading-5 text-amber-100">
-            <strong>Authentication limitation:</strong> This client currently does not verify passwords or enforce permissions through a trusted backend. Do not use it to protect real company data or production accounts.
+            <strong>Sign-in is unavailable:</strong> Access is blocked because this build has no trusted server-side password verification or authorization provider. Entering a username alone must never grant access.
           </div>
           {securityStatus.lockoutActive && (
             <div className="p-3 bg-red-950/70 border border-red-500 rounded-lg text-red-200 text-xs flex items-start gap-2.5">
