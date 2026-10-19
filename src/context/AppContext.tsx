@@ -811,7 +811,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const restoreBackup = (id: string): boolean => {
     const bkp = backups.find(b => b.id === id);
-    if (!bkp) return false;
+    if (!bkp?.snapshotData) {
+      showToast('Restore failed: this entry has no restorable snapshot data.');
+      return false;
+    }
 
     // Restore an in-memory snapshot from this running session only.
     if (bkp.snapshotData) {
