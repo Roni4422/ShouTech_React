@@ -626,38 +626,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const postInvoice = (id: number): boolean => {
     const inv = invoices.find(i => i.id === id);
-    if (!inv || inv.status === 'Posted') return false;
+    if (!inv || inv.status !== 'Draft') return false;
+    if (inv.kind === 'quotation' || inv.kind === 'stock_transfer') {
+      showToast('Posting rejected: quotations and stock transfers require their dedicated workflow.');
+      return false;
+    }
+    if (!inv.lines.length || inv.lines.some(line =>
+      !line.materialCode || !Number.isFinite(line.qty) || line.qty <= 0 ||
+      !Number.isFinite(line.unitPrice) || line.unitPrice < 0 ||
+      !Number.isFinite(line.lineTotal) || line.lineTotal < 0
+    )) {
+      showToast('Posting rejected: invoice lines contain invalid quantities or amounts.');
+      return false;
+    }
 
-    const isSales = inv.kind === 'sales' || inv.kind === 'pos' || inv.kind === 'stock_out';
-    const isPurchase = inv.kind === 'purchase' || inv.kind === 'stock_in';
-
-    setMaterials(prev => prev.map(mat => {
-      const line = inv.lines.find(l => l.materialCode === mat.code);
-      if (line) {
-        const change = isSales ? -line.qty : isPurchase ? line.qty : 0;
-        return { ...mat, qtyOnHand: Math.max(0, mat.qtyOnHand + change) };
+    const stockDirection = (kind: Invoice['kind']): number => {
+      if (kind === 'sales' || kind === 'pos' || kind === 'stock_out' || kind === 'purchase_return') return -1;
+      if (kind === 'purchase' || kind === 'stock_in' || kind === 'sales_return') return 1;
+      return 0;
+    };
+    const direction = stockDirection(inv.kind);
+    const requestedByCode = new Map<string, number>();
+    if (direction !== 0) {
+      for (const line of inv.lines) {
+        requestedByCode.set(line.materialCode, (requestedByCode.get(line.materialCode) || 0) + line.qty * direction);
       }
-      return mat;
-    }));
+      for (const [code, delta] of requestedByCode) {
+        const material = materials.find(item => item.code === code);
+        if (!material) {
+          showToast('Posting rejected: material ' + code + ' does not exist.');
+          return false;
+        }
+        if (material.qtyOnHand + delta < -0.000001) {
+          showToast('Posting rejected: insufficient stock for material ' + code + '.');
+          return false;
+        }
+      }
+    }
 
-    const newMovements: StockMovement[] = inv.lines.map((line, idx) => ({
-      id: Date.now() + idx,
+    const materialNames = new Map(materials.map(material => [material.code, material.nameAr]));
+    const now = Date.now();
+    const newMovements: StockMovement[] = direction === 0 ? [] : inv.lines.map((line, idx) => ({
+      id: now + idx,
       docNo: inv.docNo,
       date: inv.date,
-      moveType: isSales ? 'Sale' : isPurchase ? 'Purchase' : 'Adjustment',
+      moveType: direction < 0 ? (inv.kind === 'purchase_return' ? 'Purchase Return' : 'Sale') : (inv.kind === 'sales_return' ? 'Sales Return' : 'Purchase'),
       materialCode: line.materialCode,
-      materialName: line.description,
-      warehouseCode: 'WH01',
+      materialName: materialNames.get(line.materialCode) || line.description,
+      warehouseCode: warehouses.find(warehouse => warehouse.id === inv.warehouseId)?.code || 'UNASSIGNED',
       unit: line.unit,
-      qtyIn: isPurchase ? line.qty : 0,
-      qtyOut: isSales ? line.qty : 0,
+      qtyIn: direction > 0 ? line.qty : 0,
+      qtyOut: direction < 0 ? line.qty : 0,
       unitCost: line.unitPrice,
       totalValue: line.lineTotal,
-      note: `Posting ${inv.docNo}`
+      note: 'Posting ' + inv.docNo
     }));
-    setMovements(prev => [...newMovements, ...prev]);
 
-    setInvoices(prev => prev.map(i => i.id === id ? { ...i, status: 'Posted', postedBy: currentUser?.username || 'admin' } : i));
+    if (direction !== 0) {
+      setMaterials(prev => prev.map(material => {
+        const delta = requestedByCode.get(material.code);
+        return delta === undefined ? material : { ...material, qtyOnHand: material.qtyOnHand + delta };
+      }));
+      setMovements(prev => [...newMovements, ...prev]);
+    }
+
+    setInvoices(prev => prev.map(i => i.id === id ? { ...i, status: 'Posted', postedBy: currentUser?.username || 'unknown' } : i));
     recordAuditEvent('POST_INVOICE_LEDGER', 'Invoices', inv.docNo);
     showToast(translate('inv.postInvoice') + ': ' + inv.docNo);
     return true;
@@ -703,20 +736,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const jrn = journals.find(j => j.id === id);
     if (!jrn || jrn.status === 'Posted') return false;
 
-    setAccounts(prev => prev.map(acc => {
-      const debitLine = jrn.lines.find(l => l.accountCode === acc.code);
-      if (debitLine) {
-        const netDelta = (debitLine.debit || 0) - (debitLine.credit || 0);
-        return { ...acc, balance: acc.balance + netDelta };
-      }
-      return acc;
+    // Validate the actual lines, not the header totals supplied by the editor.
+    const lines = jrn.lines || [];
+    if (lines.length < 2 || lines.some(line =>
+      !line.accountCode ||
+      !Number.isFinite(line.debit) || !Number.isFinite(line.credit) ||
+      line.debit < 0 || line.credit < 0 ||
+      (line.debit > 0 && line.credit > 0) ||
+      (line.debit === 0 && line.credit === 0)
+    )) {
+      showToast('Posting rejected: journal lines are invalid. Correct the lines and try again.');
+      return false;
+    }
+
+    const totalDebit = lines.reduce((sum, line) => sum + line.debit, 0);
+    const totalCredit = lines.reduce((sum, line) => sum + line.credit, 0);
+    if (totalDebit <= 0 || Math.abs(totalDebit - totalCredit) > 0.000001) {
+      showToast('Posting rejected: journal debits must equal credits.');
+      return false;
+    }
+
+    const accountCodes = new Set(accounts.map(account => account.code));
+    if (lines.some(line => !accountCodes.has(line.accountCode))) {
+      showToast('Posting rejected: one or more accounts do not exist in the current chart.');
+      return false;
+    }
+
+    const deltas = new Map<string, number>();
+    for (const line of lines) {
+      deltas.set(line.accountCode, (deltas.get(line.accountCode) || 0) + line.debit - line.credit);
+    }
+
+    setAccounts(prev => prev.map(account => {
+      const delta = deltas.get(account.code);
+      return delta === undefined ? account : { ...account, balance: (account.balance || 0) + delta };
     }));
 
-    setJournals(prev => prev.map(j => j.id === id ? { 
-      ...j, 
-      status: 'Posted', 
-      postedBy: currentUser?.username || 'admin', 
-      postedAt: new Date().toISOString() 
+    setJournals(prev => prev.map(j => j.id === id ? {
+      ...j,
+      totalDebit,
+      totalCredit,
+      status: 'Posted',
+      postedBy: currentUser?.username || 'unknown',
+      postedAt: new Date().toISOString()
     } : j));
 
     recordAuditEvent('POST_JOURNAL_LEDGER', 'GeneralLedger', jrn.docNo);
