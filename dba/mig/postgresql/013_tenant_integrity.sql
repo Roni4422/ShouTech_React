@@ -3,7 +3,10 @@
 
 CREATE OR REPLACE FUNCTION shouttech_validate_commercial_tenant() RETURNS trigger AS $$
 BEGIN
-  IF TG_TABLE_NAME = 'commercial_documents' THEN
+  IF TG_TABLE_NAME = 'products' THEN
+    IF NOT EXISTS (SELECT 1 FROM product_categories c WHERE c.category_id=NEW.category_id AND c.company_id=NEW.company_id) THEN RAISE EXCEPTION 'Product category must belong to the same company'; END IF;
+    IF NOT EXISTS (SELECT 1 FROM units_of_measure u WHERE u.uom_id=NEW.primary_uom_id AND u.company_id=NEW.company_id) THEN RAISE EXCEPTION 'Product unit must belong to the same company'; END IF;
+  ELSIF TG_TABLE_NAME = 'commercial_documents' THEN
     IF NEW.party_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM business_parties p WHERE p.party_id=NEW.party_id AND p.company_id=NEW.company_id) THEN RAISE EXCEPTION 'Document party must belong to the same company'; END IF;
     IF NEW.source_document_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM commercial_documents d WHERE d.document_id=NEW.source_document_id AND d.company_id=NEW.company_id) THEN RAISE EXCEPTION 'Source document must belong to the same company'; END IF;
     IF NEW.journal_entry_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM journal_entries j WHERE j.journal_entry_id=NEW.journal_entry_id AND j.company_id=NEW.company_id) THEN RAISE EXCEPTION 'Journal entry must belong to the same company'; END IF;
@@ -54,3 +57,7 @@ DROP TRIGGER IF EXISTS trg_order_line_tenant ON commercial_order_lines;
 CREATE TRIGGER trg_order_line_tenant BEFORE INSERT OR UPDATE ON commercial_order_lines FOR EACH ROW EXECUTE FUNCTION shouttech_validate_commercial_tenant();
 DROP TRIGGER IF EXISTS trg_bank_account_tenant ON bank_accounts;
 CREATE TRIGGER trg_bank_account_tenant BEFORE INSERT OR UPDATE OF company_id, gl_account_id ON bank_accounts FOR EACH ROW EXECUTE FUNCTION shouttech_validate_commercial_tenant();
+
+DROP TRIGGER IF EXISTS trg_product_master_tenant ON products;
+CREATE TRIGGER trg_product_master_tenant BEFORE INSERT OR UPDATE ON products
+FOR EACH ROW EXECUTE FUNCTION shouttech_validate_commercial_tenant();
