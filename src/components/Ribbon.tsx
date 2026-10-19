@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  Activity, ArrowLeftRight, BarChart3, BookOpen, Building2, Calculator, CheckCircle2,
-  Coins, Cpu, Database, FileCheck, FileText, Factory, Gauge, Layers, LayoutDashboard,
+  Activity, ArrowLeftRight, BarChart3, BookOpen, Building2, Calculator,
+  Coins, Cpu, Database, FileCheck, FileText, Factory, Layers, LayoutDashboard,
   Package, Printer, Receipt, Scale, Settings, ShieldAlert, ShieldCheck, ShoppingCart,
   Truck, Users, UserCheck, Warehouse, Wrench, ClipboardList, Brain
 } from 'lucide-react';
@@ -56,7 +56,7 @@ const groups: { label: string; windows: ActiveWindow[] }[] = [
 ];
 
 export const Ribbon: React.FC = () => {
-  const { activeWindow, openWindow, translate, createBackup } = useApp();
+  const { activeWindow, openWindow, translate } = useApp();
 
   const activeGroup = groups.find(group => group.windows.includes(activeWindow)) ?? groups[0];
   const commandWindows = activeGroup.windows
@@ -121,7 +121,7 @@ export const Ribbon: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => createBackup()}
+            onClick={() => openWindow('backup')}
             className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-[var(--surface-light)] text-[11px] gap-1 min-w-[60px]"
           >
             <Database className="w-4 h-4 text-[var(--primary)]" />
