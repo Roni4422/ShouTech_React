@@ -11,13 +11,10 @@ export const SecurityCenterView: React.FC = () => {
     recordAuditEvent, showToast 
   } = useApp();
 
-  const [handshakeCount, setHandshakeCount] = useState(1482);
-  const [activeTab, setActiveTab] = useState<'status' | 'audit_chain' | 'rbac'>('status');
+    const [activeTab, setActiveTab] = useState<'status' | 'audit_chain' | 'rbac'>('status');
 
   const triggerHandshake = () => {
-    setHandshakeCount(prev => prev + 1);
-    recordAuditEvent('DONGLE_HANDSHAKE_VERIFIED', 'SecurityGuard', `HS-${handshakeCount + 1}`);
-    showToast('2026 Sentinel Cryptographic Handshake Verified (SHA3-512 OK)');
+    showToast('Hardware security integration is not configured. No handshake was attempted or verified.');
   };
 
   return (
@@ -32,11 +29,11 @@ export const SecurityCenterView: React.FC = () => {
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               <span>2026 Enterprise Security & Integrity Center</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono font-bold">
-                Level 4 Protection Active
+                Security integration unavailable
               </span>
             </h1>
             <p className="text-xs text-gray-400 mt-1">
-              Superior to Al-Ameen v10 · Hardware Dongle Emulation · Immutable SHA-256 Ledger Chaining · Zero-Trust RBAC
+              Security status is unverified · Hardware dongle is not connected · Audit hashes are not cryptographic
             </p>
           </div>
         </div>
@@ -91,8 +88,8 @@ export const SecurityCenterView: React.FC = () => {
                 <span className="font-semibold text-white">Anti-Tamper & Memory Guard</span>
                 <CheckCircle2 className="w-4 h-4 text-cyan-400" />
               </div>
-              <div className="text-xl font-bold text-white">Active & Guarded</div>
-              <div className="text-[11px] text-gray-400">SHA3-512 Handshakes: {handshakeCount}</div>
+              <div className="text-xl font-bold text-white">Not active / not verified</div>
+              <div className="text-[11px] text-gray-400">No hardware handshake has been verified</div>
             </div>
 
             <div className="p-4 rounded-xl bg-[#242424] border border-purple-500/30 space-y-2">
@@ -112,7 +109,7 @@ export const SecurityCenterView: React.FC = () => {
                 <span>Sentinel Cryptographic Handshake Verification</span>
               </h3>
               <p className="text-xs text-gray-400 mt-1">
-                Directly queries the 2026 hardware-bound cryptographic security dongle to authorize accounting periods.
+                No hardware dongle adapter is configured. This control cannot verify hardware or authorize accounting periods.
               </p>
             </div>
             <button
@@ -120,22 +117,22 @@ export const SecurityCenterView: React.FC = () => {
               className="px-4 py-2 bg-[#0078D4] hover:bg-[#1084D9] text-white rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 shrink-0"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>Verify Handshake Now</span>
+              <span>Check integration status</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* Tab 2: Immutable SHA-256 Ledger Chain (Anti-Tamper) */}
+      {/* Tab 2: Unverified local audit log */}
       {activeTab === 'audit_chain' && (
         <div className="space-y-4">
           <div className="bg-[#242424] p-4 rounded-xl border border-[#383838]">
             <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
               <Hash className="w-4 h-4 text-cyan-400" />
-              <span>Cryptographic Hash-Chained Audit Ledger (Anti-Fraud)</span>
+              <span>Local audit log (integrity not verified)</span>
             </h3>
             <p className="text-xs text-gray-400 leading-relaxed">
-              Unlike legacy systems where records could be quietly updated in SQL, ShouTech ERP computes an incremental SHA-256 block hash for every posted invoice, reversal, and journal entry. If any database record is tampered with, the ledger chain breaks immediately.
+              Audit entries are currently stored in browser localStorage and use a non-cryptographic digest. This view does not verify the chain and cannot detect tampering. Do not treat these hashes as SHA-256 or as a security control.
             </p>
           </div>
 
