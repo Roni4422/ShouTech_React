@@ -452,7 +452,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Lifecycle Flow Steps
   const advanceFromSplash = () => {
-    recordAuditEvent('STARTUP_DIAGNOSTICS_PASSED', 'SecurityGuard', 'SYSTEM');
     setAppStage('company_select');
   };
 
