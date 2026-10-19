@@ -158,7 +158,6 @@ export const BackupView: React.FC = () => {
               <label className="block text-[11px] text-gray-400 mb-1">وجهة ومكان التخزين</label>
               <select
                 value={targetLocation}
-                onChange={e => setTargetLocation(e.target.value as any)}
                 className="w-full bg-[#1A1A1A] border border-[#444] rounded px-3 py-1.5 text-xs text-white font-medium"
               >
                 <option value="local">تنزيل ملف JSON عبر المتصفح (غير مشفّر)</option>
@@ -176,18 +175,7 @@ export const BackupView: React.FC = () => {
             </div>
           </div>
 
-          {targetLocation === 'custom_path' && (
-            <div className="pt-2 flex items-center gap-2">
-              <Folder className="w-4 h-4 text-amber-400 shrink-0" />
-              <input
-                type="text"
-                value={customPath}
-                onChange={e => setCustomPath(e.target.value)}
-                placeholder="e.g. D:\ShouTech_ERP_Backups\ or \\SERVER_NAS\Backups\"
-                className="w-full bg-[#1A1A1A] border border-amber-500/40 rounded px-3 py-1 text-xs text-white font-mono"
-              />
-            </div>
-          )}
+}
         </div>
 
         {/* Backups Table (Local & Cloud Vault Snapshots) */}
