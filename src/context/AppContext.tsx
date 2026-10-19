@@ -275,8 +275,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_COMPANIES;
   });
   const [currentCompany, setCurrentCompany] = useState<Company>(INITIAL_COMPANIES[0]);
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [currentUser, setCurrentUser] = useState<User | null>(INITIAL_USERS[0]);
+  // User profiles are cached per browser only. This is not a secure identity store.
+  const [users, setUsers] = useState<User[]>(() => {
+    try {
+      const saved = localStorage.getItem('shoutech_users');
+      if (!saved) return INITIAL_USERS;
+      const parsed: unknown = JSON.parse(saved);
+      if (
+        Array.isArray(parsed) &&
+        parsed.every((entry: unknown) => {
+          if (!entry || typeof entry !== 'object') return false;
+          const user = entry as Partial<User>;
+          return typeof user.id === 'string' &&
+            typeof user.username === 'string' &&
+            typeof user.fullName === 'string' &&
+            typeof user.fullNameEn === 'string' &&
+            typeof user.email === 'string' &&
+            (user.role === 'admin' || user.role === 'user' || user.role === 'viewer') &&
+            typeof user.active === 'boolean' &&
+            Array.isArray(user.permissions);
+        })
+      ) {
+        return parsed as User[];
+      }
+    } catch {
+      // Ignore malformed browser cache and fall back to bundled starter profiles.
+    }
+    return INITIAL_USERS;
+  });
+  // Authentication must start unauthenticated; never grant the first seeded user implicitly.
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // 2026 High-Level Security Engine State
@@ -422,6 +450,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('shoutech_audit', JSON.stringify(auditLogs));
   }, [auditLogs]);
 
+  useEffect(() => {
+    localStorage.setItem('shoutech_users', JSON.stringify(users));
+  }, [users]);
+
   const setLanguage = (lang: LanguageCode) => setLanguageState(lang);
   const setTheme = (mode: ThemeMode) => setThemeState(mode);
 
@@ -497,8 +529,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    const found = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-    if (found) {
+    const normalizedUsername = username.trim().toLocaleLowerCase();
+    const found = users.find(u => u.username.trim().toLocaleLowerCase() === normalizedUsername);
+    if (found && found.active) {
       setCurrentUser(found);
       setIsLoggedIn(true);
       setSecurityStatus(prev => ({ ...prev, failedLoginAttempts: 0 }));
