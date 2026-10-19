@@ -53,7 +53,6 @@ export const QuickToolbar: React.FC = () => {
           <span className="text-[10px] px-1 bg-white/10 rounded text-gray-400 font-mono">10.6.0</span>
         </div>
 
-/button>
 
         <button 
           onClick={() => openPreview(`معاينة مستند: ${activeWindow}`, activeWindow)}
@@ -64,7 +63,6 @@ export const QuickToolbar: React.FC = () => {
           <span className="text-[10px] font-bold hidden sm:inline">معاينة وورد</span>
         </button>
 
-/button>
       </div>
 
       {/* Right controls: Company, User, Lang, Theme */}
