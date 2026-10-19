@@ -42,11 +42,11 @@ export const QuickToolbar: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#1E1E1E] border-b border-[#333333] px-3 py-1.5 flex items-center justify-between text-xs text-gray-300">
+    <div className="st-toolbar border-b px-3 py-1.5 flex items-center justify-between text-xs">
       {/* Quick Action Icons */}
       <div className="flex items-center space-x-2 rtl:space-x-reverse">
         <div className="flex items-center gap-1.5 pe-3 border-e border-[#383838]">
-          <div className="w-6 h-6 rounded bg-[#0078D4] flex items-center justify-center font-bold text-white text-[10px]">
+          <div className="w-6 h-6 rounded bg-[var(--primary)] flex items-center justify-center font-bold text-white text-[10px]">
             ST
           </div>
           <span className="font-bold text-white tracking-wide">ShouTech ERP</span>
@@ -70,7 +70,7 @@ export const QuickToolbar: React.FC = () => {
         {/* Company Switcher */}
         <button
           onClick={() => setShowCompanySelect(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 bg-[#282828] hover:bg-[#323232] border border-white/10 rounded text-gray-200 hover:text-white transition-colors"
+          className="st-control flex items-center gap-1.5 px-2.5 py-1 bg-[var(--surface)] hover:bg-[var(--surface-light)] text-[var(--text-primary)] transition-colors"
           title={translate('company.selectTitle')}
         >
           <Building2 className="w-3.5 h-3.5 text-[#0078D4]" />
@@ -81,7 +81,7 @@ export const QuickToolbar: React.FC = () => {
         {/* User Account */}
         <button
           onClick={() => setShowLoginModal(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 bg-[#282828] hover:bg-[#323232] border border-white/10 rounded text-gray-200 hover:text-white transition-colors"
+          className="st-control flex items-center gap-1.5 px-2.5 py-1 bg-[var(--surface)] hover:bg-[var(--surface-light)] text-[var(--text-primary)] transition-colors"
         >
           <UserCircle className="w-3.5 h-3.5 text-emerald-400" />
           <span>{currentUser?.fullName || 'User'}</span>
