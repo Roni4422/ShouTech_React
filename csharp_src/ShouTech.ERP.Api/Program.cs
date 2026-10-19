@@ -47,10 +47,7 @@ app.MapGet("/api/companies", async (IDbConnectionFactory db) =>
             """
             SELECT CAST(company_id AS TEXT) AS CompanyId, company_code AS Code,
                    company_name_ar AS Name, company_name_en AS NameEn,
-                   currency_code AS Currency, language_code AS Language,
-                   COALESCE(email, '') AS Email, COALESCE(phone, '') AS Phone,
-                   COALESCE(address_line1, '') AS Address,
-                   COALESCE(commercial_registration, '') AS CommercialRegistration
+                   currency_code AS Currency, language_code AS Language
             FROM companies
             WHERE is_active = @Active AND is_deleted = @Deleted
             ORDER BY company_name_en, company_code
@@ -201,13 +198,19 @@ app.MapPost("/api/auth/login", async (LoginRequest request, HttpContext http, ID
 
         if (!hasher.Verify(user.PasswordHash, request.Password))
         {
-            var attempts = user.FailedAttempts + 1;
             var limit = Math.Clamp(configuration.GetValue("Authentication:MaxFailedAttempts", 5), 3, 20);
             var lockMinutes = Math.Clamp(configuration.GetValue("Authentication:LockoutMinutes", 15), 1, 1440);
-            object? lockUntil = attempts >= limit ? db.FormatTimestamp(DateTimeOffset.UtcNow.AddMinutes(lockMinutes)) : null;
-            await connection.ExecuteAsync(
-                "UPDATE user_credentials SET failed_attempt_count = @Attempts, locked_until = @LockedUntil, updated_at = CURRENT_TIMESTAMP WHERE user_id = @UserId",
-                new { Attempts = attempts, LockedUntil = lockUntil, UserId = db.ToIdentifier(user.UserId) });
+            var lockUntil = db.FormatTimestamp(DateTimeOffset.UtcNow.AddMinutes(lockMinutes));
+            var attempts = await connection.ExecuteScalarAsync<int>(
+                """
+                UPDATE user_credentials
+                SET failed_attempt_count = failed_attempt_count + 1,
+                    locked_until = CASE WHEN failed_attempt_count + 1 >= @Limit THEN @LockedUntil ELSE locked_until END,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = @UserId
+                RETURNING failed_attempt_count
+                """,
+                new { Limit = limit, LockedUntil = lockUntil, UserId = db.ToIdentifier(user.UserId) });
             await RecordAuthEventAsync(connection, db, user.CompanyId, user.UserId, user.Username,
                 attempts >= limit ? "account_locked" : "login_failed", http);
             return Results.Unauthorized();
@@ -356,8 +359,7 @@ public sealed record LoginRequest(string Username, string Password, string Compa
 public sealed record InitialCompanyRequest(string CompanyCode, string CompanyNameAr, string CompanyNameEn,
     string AdminUsername, string AdminPassword, string AdminFullName, string? Email, string? Phone,
     string? Address, string? CommercialRegistration, string? CurrencyCode, string? LanguageCode);
-public sealed record PublicCompany(string CompanyId, string Code, string Name, string NameEn, string Currency,
-    string Language, string Email, string Phone, string Address, string CommercialRegistration);
+public sealed record PublicCompany(string CompanyId, string Code, string Name, string NameEn, string Currency, string Language);
 public sealed record AuthSessionResponse(string AccessToken, DateTimeOffset ExpiresAt, string UserId, string CompanyId,
     string Username, string FullName, string FullNameEn, string Email, string RoleCode, string[] Permissions);
 public sealed record AuthUser(string UserId, string CompanyId, string Username, object CompanyActive, object CompanyDeleted,
