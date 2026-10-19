@@ -52,8 +52,6 @@ These mappings identify available destinations only. They do not establish that 
 - New company or business record, according to context
 - Import data
 - Export data
-- Import POS data
-- Export POS data
 - Import card/master record
 - Exit application
 
@@ -92,6 +90,7 @@ These mappings identify available destinations only. They do not establish that 
 
 ### POS
 - POS terminals and definitions, terminal cash report, discounts, synchronization and POS reports
+- Import POS data and export POS data (these commands belong under POS, not File)
 - Price/quantity/item removal actions only within a validated, permission-controlled active sale; changes must be auditable
 
 ### Orders
@@ -146,7 +145,7 @@ These mappings identify available destinations only. They do not establish that 
 
 ## 5. Delivery sequence for this menu
 
-1. Inventory every requested leaf command and classify it as **Verified**, **Partial**, **Missing** or **Not assessed** based on source and runtime evidence.
+1. Inventory every requested leaf command and classify it as **Verified**, **Partial**, **Missing** or **Not assessed** based on source and runtime evidence. POS import/export are explicitly assigned to the POS menu, not File.
 2. Build a typed navigation registry with stable command IDs, translation keys, destination IDs, permission keys and implementation status. Keep it separate from component rendering.
 3. Refactor the main window into top-level menu tabs and context-sensitive ribbon groups using only validated mappings.
 4. Implement leaf workflows in dependency order: master data → accounting and stock invariants → documents/posting → reports → import/export/backup/administration.
