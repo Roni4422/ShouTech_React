@@ -170,8 +170,8 @@ export const ReportsView: React.FC = () => {
                   <h3 className="text-sm font-bold text-white">{translate('reports.trialBalance')}</h3>
                   <p className="text-xs text-gray-400">Fiscal Period: {fromDate} ~ {toDate}</p>
                 </div>
-                <div className="text-xs text-emerald-400 font-mono font-bold">
-                  Balanced (General Ledger Audited)
+                <div className="text-xs text-amber-300 font-mono font-bold">
+                  {translate('reports.trialBalanceUnverified')}
                 </div>
               </div>
 
@@ -305,19 +305,15 @@ export const ReportsView: React.FC = () => {
             <div className="overflow-y-auto flex-1">
               <div className="p-4 bg-[#1A1A1A] border-b border-[#383838]">
                 <h3 className="text-sm font-bold text-white">{translate('reports.customerAging')}</h3>
-                <p className="text-xs text-gray-400">Aging Schedule of Accounts Receivable</p>
+                <p className="text-xs text-amber-300">{translate('reports.customerAgingUnavailable')}</p>
               </div>
 
               <table className="w-full text-start text-xs">
                 <thead className="bg-[#1F1F1F] text-gray-400 border-b border-[#383838]">
                   <tr>
-                    <th className="py-2.5 px-3 text-start">Customer Code</th>
-                    <th className="py-2.5 px-3 text-start">Customer Name</th>
-                    <th className="py-2.5 px-3 text-end">0-30 Days</th>
-                    <th className="py-2.5 px-3 text-end">31-60 Days</th>
-                    <th className="py-2.5 px-3 text-end">61-90 Days</th>
-                    <th className="py-2.5 px-3 text-end">90+ Days</th>
-                    <th className="py-2.5 px-3 text-end">Total Due</th>
+                    <th className="py-2.5 px-3 text-start">{translate('common.code')}</th>
+                    <th className="py-2.5 px-3 text-start">{translate('common.name')}</th>
+                    <th className="py-2.5 px-3 text-end">{translate('reports.outstandingBalance')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#303030]">
@@ -325,10 +321,6 @@ export const ReportsView: React.FC = () => {
                     <tr key={cust.id} className="hover:bg-white/5">
                       <td className="py-2.5 px-3 font-mono text-cyan-400">{cust.code}</td>
                       <td className="py-2.5 px-3 font-semibold text-white">{cust.nameAr}</td>
-                      <td className="py-2.5 px-3 text-end font-mono text-gray-300">{(cust.balance * 0.6).toFixed(2)}</td>
-                      <td className="py-2.5 px-3 text-end font-mono text-gray-300">{(cust.balance * 0.3).toFixed(2)}</td>
-                      <td className="py-2.5 px-3 text-end font-mono text-gray-300">{(cust.balance * 0.1).toFixed(2)}</td>
-                      <td className="py-2.5 px-3 text-end font-mono text-gray-400">0.00</td>
                       <td className="py-2.5 px-3 text-end font-mono font-bold text-emerald-400">
                         {cust.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} SAR
                       </td>
