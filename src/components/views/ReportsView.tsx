@@ -145,6 +145,10 @@ export const ReportsView: React.FC = () => {
                   return;
                 }
                 if (activeReport === 'trial_balance') {
+                  showToast(translate('reports.trialBalanceUnverified'));
+                  return;
+                }
+                if (activeReport === 'trial_balance_export_legacy_disabled') {
                   exportCSV([
                     ...accountBalanceRows.map(({ account, debit, credit }) => ({
                       RecordType: 'ACCOUNT', Code: account.code, Name: account.nameAr,
