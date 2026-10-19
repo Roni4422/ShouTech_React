@@ -311,22 +311,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // 2026 High-Level Security Engine State
   const [securityStatus, setSecurityStatus] = useState<SecurityStatus>({
     dongleConnected: false, // Per request: hardware dongle is currently physically unavailable, but primed and listening
-    dongleId: 'ST-SENTINEL-2026-BRIDGE',
-    dongleFirmware: 'v4.2026-AES256GCM',
-    donglePrimedForReception: true,
+    dongleId: 'Not connected',
+    dongleFirmware: 'Not detected',
+    donglePrimedForReception: false,
     dongleListeningPort: 'USB HID \\\\?\\hid#vid_04b9&pid_0300 (Listening...)',
     licenseServerUrl: 'https://license-vault.shoutech-erp.com:8443/v1',
-    licenseServerStatus: 'primed_listening',
-    serverLeaseDaysRemaining: 365,
-    antiTamperActive: true,
+    licenseServerStatus: 'offline_grace_mode',
+    serverLeaseDaysRemaining: 0,
+    antiTamperActive: false,
     sha256ChainIntact: false,
     failedLoginAttempts: 0,
     maxAttempts: 5,
     lockoutActive: false,
-    encryptionMode: 'AES-256-GCM / Argon2id (Military Grade)',
+    encryptionMode: 'Not configured',
     sessionTimeoutMin: 30,
-    remoteCloudBackupActive: true,
-    cloudBackupsRetainedCount: 3,
+    remoteCloudBackupActive: false,
+    cloudBackupsRetainedCount: 0,
     lastCloudBackupTimestamp: new Date().toISOString()
   });
 
