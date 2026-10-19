@@ -126,7 +126,7 @@ export const ReportsView: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                if (!fromDate || !toDate || fromDate > toDate) {
+                if (activeReport === 'material_moves' && (!fromDate || !toDate || fromDate > toDate)) {
                   showToast('Export rejected: enter a valid date range.');
                   return;
                 }
@@ -143,7 +143,7 @@ export const ReportsView: React.FC = () => {
                 } else if (activeReport === 'customer_aging') {
                   exportCSV(parties.filter(p => p.type === 'Customer').map(c => ({
                     CustomerCode: c.code, CustomerName: c.nameAr, TotalDue: c.balance
-                  })), 'Customer_Aging');
+                  })), 'Customer_Balances');
                 } else {
                   exportCSV(materials.map(m => ({
                     Code: m.code, Material: m.nameAr, SellingPrice: m.priceRetail, AverageCost: m.cost,
@@ -168,7 +168,7 @@ export const ReportsView: React.FC = () => {
               <div className="p-4 bg-[#1A1A1A] border-b border-[#383838] flex justify-between items-center">
                 <div>
                   <h3 className="text-sm font-bold text-white">{translate('reports.trialBalance')}</h3>
-                  <p className="text-xs text-gray-400">Fiscal Period: {fromDate} ~ {toDate}</p>
+                  <p className="text-xs text-amber-300">{translate('reports.trialBalancePeriodUnavailable')}</p>
                 </div>
                 <div className="text-xs text-amber-300 font-mono font-bold">
                   {translate('reports.trialBalanceUnverified')}
