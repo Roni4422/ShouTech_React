@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ShouTech.ERP.Core</RootNamespace>
+    <AssemblyName>ShouTech.ERP.Core</AssemblyName>
+    <Version>10.6.0</Version>
+    <Authors>ShouTech Software</Authors>
+    <Company>ShouTech Software Co.</Company>
+    <Description>ShouTech ERP — Core C# Business Logic & Accounting Engine</Description>
+  </PropertyGroup>
+
+</Project>

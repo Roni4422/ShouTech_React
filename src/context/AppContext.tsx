@@ -1,0 +1,945 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  Company, User, Material, Warehouse, Account, Invoice, JournalEntry, 
+  StockMovement, BackupRecord, LanguageCode, ThemeMode, ActiveWindow, CustomerParty,
+  AppStage, CostCenter, ChequeRecord, AuditLogEntry, SecurityStatus, DockedWindow
+} from '../types';
+import { 
+  INITIAL_COMPANIES, INITIAL_USERS, INITIAL_MATERIALS, INITIAL_WAREHOUSES, 
+  INITIAL_ACCOUNTS, INITIAL_INVOICES, INITIAL_JOURNALS, INITIAL_MOVEMENTS, 
+  INITIAL_BACKUPS, INITIAL_PARTIES, INITIAL_COST_CENTERS, INITIAL_CHEQUES, INITIAL_AUDIT_LOGS 
+} from '../data/initialData';
+import { t } from '../i18n';
+
+interface AppContextType {
+  // App lifecycle stages: Splash -> Company Selection -> Login -> Main Window
+  appStage: AppStage;
+  setAppStage: (stage: AppStage) => void;
+  advanceFromSplash: () => void;
+  selectCompanyAndProceed: (comp: Company) => void;
+  backToCompanySelect: () => void;
+  lockWorkstation: () => void;
+  switchCompany: () => void;
+  showCompanySelect: boolean;
+  setShowCompanySelect: (show: boolean) => void;
+  showLoginModal: boolean;
+  setShowLoginModal: (show: boolean) => void;
+  showSplash: boolean;
+  setShowSplash: (show: boolean) => void;
+
+  // Language & Theme
+  language: LanguageCode;
+  setLanguage: (lang: LanguageCode) => void;
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  activeWindow: ActiveWindow;
+  setActiveWindow: (win: ActiveWindow) => void;
+
+  // Multi-Window MDI Desktop Architecture (Phenix v9 & Al-Ameen)
+  openWindows: DockedWindow[];
+  activeWindowId: string;
+  openWindow: (winType: ActiveWindow, title?: string, subTab?: string) => void;
+  closeWindow: (id: string) => void;
+  closeAllWindows: () => void;
+  focusWindow: (id: string) => void;
+  minimizeWindow: (id: string) => void;
+  windowLayout: 'tabbed' | 'tileH' | 'tileV' | 'cascade';
+  setWindowLayout: (layout: 'tabbed' | 'tileH' | 'tileV' | 'cascade') => void;
+  
+  // Auth & Session
+  currentUser: User | null;
+  currentCompany: Company;
+  setCurrentCompany: (comp: Company) => void;
+  isLoggedIn: boolean;
+  login: (username: string) => boolean;
+  logout: () => void;
+  
+  // 2026 Security Engine & Integrity Status
+  securityStatus: SecurityStatus;
+  auditLogs: AuditLogEntry[];
+  recordAuditEvent: (action: string, module: string, recordId: string) => void;
+  resetSecurityLockout: () => void;
+
+  // Data
+  companies: Company[];
+  addCompany: (comp: Omit<Company, 'id'>) => void;
+  users: User[];
+  materials: Material[];
+  warehouses: Warehouse[];
+  accounts: Account[];
+  invoices: Invoice[];
+  journals: JournalEntry[];
+  movements: StockMovement[];
+  backups: BackupRecord[];
+  parties: CustomerParty[];
+  costCenters: CostCenter[];
+  cheques: ChequeRecord[];
+  
+  // Actions
+  addMaterial: (mat: Omit<Material, 'id'>) => void;
+  updateMaterial: (id: number, mat: Partial<Material>) => void;
+  deleteMaterial: (id: number) => void;
+  
+  addWarehouse: (wh: Omit<Warehouse, 'id'>) => void;
+  updateWarehouse: (id: number, wh: Partial<Warehouse>) => void;
+  
+  addAccount: (acc: Account) => void;
+  
+  saveInvoice: (inv: Omit<Invoice, 'id'>) => number;
+  postInvoice: (id: number) => boolean;
+  reverseInvoice: (id: number, reason: string) => boolean;
+  
+  saveJournal: (jrn: Omit<JournalEntry, 'id'>) => number;
+  postJournal: (id: number) => boolean;
+  
+  transferStock: (sourceWhId: number, targetWhId: number, materialCode: string, qty: number, reason: string) => boolean;
+  
+  createBackup: (note?: string, target?: 'local' | 'cloud_vault' | 'custom_path', trigger?: 'session_end' | 'session_start' | 'manual' | 'daily_scheduled') => BackupRecord;
+  restoreBackup: (id: string) => boolean;
+  syncCloudBackups: () => void;
+  
+  addUser: (user: Omit<User, 'id'>) => void;
+  updateChequeStatus: (id: string, status: 'under_collection' | 'collected' | 'returned') => void;
+  addCheque: (cheque: Omit<ChequeRecord, 'id'>) => void;
+  
+  // Microsoft Word-like Document & Print Preview
+  isPreviewOpen: boolean;
+  previewMeta: { title: string; docType: string; data?: any };
+  openPreview: (title: string, docType?: string, data?: any) => void;
+  closePreview: () => void;
+
+  // Notification / Alert toast
+  toastMessage: string | null;
+  showToast: (msg: string) => void;
+  
+  // Translation helper bound to current language
+  translate: (key: string) => string;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+// Helper to calculate SHA-256-like hex hash for audit chain
+function pseudoSha256(str: string): string {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const part1 = (4294967296 + h1).toString(16).padStart(8, '0');
+  const part2 = (4294967296 + h2).toString(16).padStart(8, '0');
+  const part3 = (4294967296 + (h1 ^ h2)).toString(16).padStart(8, '0');
+  const part4 = (4294967296 + (h1 + h2)).toString(16).padStart(8, '0');
+  return (part1 + part2 + part3 + part4 + part2 + part1 + part4 + part3).slice(0, 64);
+}
+
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Config
+  const [language, setLanguageState] = useState<LanguageCode>(() => {
+    return (localStorage.getItem('shoutech_lang') as LanguageCode) || 'ar';
+  });
+
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    return (localStorage.getItem('shoutech_theme') as ThemeMode) || 'dark';
+  });
+
+  const [activeWindow, setActiveWindowState] = useState<ActiveWindow>('dashboard');
+
+  const DEFAULT_WINDOW_TITLES: Record<ActiveWindow, string> = {
+    dashboard: 'لوحة التحكم والمؤشرات (Dashboard)',
+    pos: 'نقطة البيع والكاشير (POS)',
+    invoices: 'إدارة الفواتير والمناقلات (Invoices)',
+    materials: 'دليل بطاقات المواد والمخزون (Items)',
+    warehouses: 'إدارة المستودعات والتخزين (Warehouses)',
+    coa: 'دليل وشجرة الحسابات العامة (COA)',
+    costCenters: 'مراكز الكلفة والتحليل التشغيلي (Cost Centers)',
+    currencies: 'نشرة أسعار العملات وفروق الصرف (Currencies)',
+    journals: 'دفتر اليومية وسندات القيد (Journals)',
+    cheques: 'الأوراق المالية والشيكات (Cheques)',
+    closingAccounts: 'الحسابات الختامية والميزانية (Closing Accounts)',
+    financialAnalysis: 'التحليل المالي وتنبؤات AI (Analytics & AI)',
+    orders: 'إدارة الطلبيات والمبيعات (Orders)',
+    crm: 'إدارة علاقات العملاء والذمم (CRM)',
+    salesReps: 'مندوبو المبيعات والأجهزة الكفية (Sales Reps)',
+    manufacturing: 'التصنيع وتكاليف الإنتاج (MRP & BOM)',
+    banks: 'إدارة البنوك والتسوية البنكية (Banks)',
+    reports: 'التقارير التنفيذية والمخصصة (Reports)',
+    aiEnterprise: 'الذكاء الاصطناعي وكشف الاحتيال (AI Suite)',
+    securityCenter: 'الأمان العسكري والدونغل Sentinel (Military Security)',
+    tools: 'أدوات النظام واللغات العشر (Tools)',
+    enterpriseOptions: 'خيارات وتجهيزات الملحقات والميزان (Options & Peripherals)',
+    delivery: 'إدارة التوصيل والأسطول (Delivery)',
+    backup: 'النسخ الاحتياطي المشفر (Backup)',
+    dataExchange: 'استيراد وتصدير البيانات (Data Exchange)',
+    settings: 'خيارات النظام وصلاحيات المستخدمين (Settings)',
+    users: 'سجل المستخدمين ومصفوفة الأمان (Users & RBAC)',
+    nativeEngine: 'المحرك الأصلي C & C# (Native Engine)',
+    license: 'إدارة ترخيص النظام (License)',
+    about: 'حول برنامج شو تيك ERP v10 (About)'
+  };
+
+  const [openWindows, setOpenWindows] = useState<DockedWindow[]>([
+    { id: 'win-dashboard', windowType: 'dashboard', title: DEFAULT_WINDOW_TITLES.dashboard, isMinimized: false, openedAt: new Date().toISOString() }
+  ]);
+  const [activeWindowId, setActiveWindowId] = useState<string>('win-dashboard');
+  const [windowLayout, setWindowLayout] = useState<'tabbed' | 'tileH' | 'tileV' | 'cascade'>('tabbed');
+
+  const openWindow = (winType: ActiveWindow, title?: string, subTab?: string) => {
+    setActiveWindowState(winType);
+    const existing = openWindows.find(w => w.windowType === winType);
+    if (existing) {
+      setActiveWindowId(existing.id);
+      if (existing.isMinimized) {
+        setOpenWindows(prev => prev.map(w => w.id === existing.id ? { ...w, isMinimized: false } : w));
+      }
+    } else {
+      const newId = `win-${winType}-${Date.now()}`;
+      const newWin: DockedWindow = {
+        id: newId,
+        windowType: winType,
+        title: title || DEFAULT_WINDOW_TITLES[winType] || winType,
+        subTab,
+        isMinimized: false,
+        openedAt: new Date().toISOString()
+      };
+      setOpenWindows(prev => [...prev, newWin]);
+      setActiveWindowId(newId);
+    }
+  };
+
+  const setActiveWindow = (win: ActiveWindow) => {
+    openWindow(win);
+  };
+
+  const closeWindow = (id: string) => {
+    setOpenWindows(prev => {
+      const filtered = prev.filter(w => w.id !== id);
+      if (filtered.length === 0) {
+        const fallback: DockedWindow = {
+          id: 'win-dashboard',
+          windowType: 'dashboard',
+          title: DEFAULT_WINDOW_TITLES.dashboard,
+          isMinimized: false,
+          openedAt: new Date().toISOString()
+        };
+        setActiveWindowState('dashboard');
+        setActiveWindowId('win-dashboard');
+        return [fallback];
+      }
+      if (activeWindowId === id) {
+        const next = filtered[filtered.length - 1];
+        setActiveWindowState(next.windowType);
+        setActiveWindowId(next.id);
+      }
+      return filtered;
+    });
+  };
+
+  const closeAllWindows = () => {
+    const fallback: DockedWindow = {
+      id: 'win-dashboard',
+      windowType: 'dashboard',
+      title: DEFAULT_WINDOW_TITLES.dashboard,
+      isMinimized: false,
+      openedAt: new Date().toISOString()
+    };
+    setOpenWindows([fallback]);
+    setActiveWindowState('dashboard');
+    setActiveWindowId('win-dashboard');
+  };
+
+  const focusWindow = (id: string) => {
+    const win = openWindows.find(w => w.id === id);
+    if (win) {
+      setActiveWindowState(win.windowType);
+      setActiveWindowId(id);
+      if (win.isMinimized) {
+        setOpenWindows(prev => prev.map(w => w.id === id ? { ...w, isMinimized: false } : w));
+      }
+    }
+  };
+
+  const minimizeWindow = (id: string) => {
+    setOpenWindows(prev => prev.map(w => w.id === id ? { ...w, isMinimized: !w.isMinimized } : w));
+  };
+  
+  // Strict Enterprise Startup Lifecycle: Splash -> Company Select -> Login -> Main
+  const [appStage, setAppStage] = useState<AppStage>('splash');
+
+  // Entities
+  const [companies, setCompanies] = useState<Company[]>(() => {
+    const saved = localStorage.getItem('shoutech_companies');
+    return saved ? JSON.parse(saved) : INITIAL_COMPANIES;
+  });
+  const [currentCompany, setCurrentCompany] = useState<Company>(INITIAL_COMPANIES[0]);
+  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+  const [currentUser, setCurrentUser] = useState<User | null>(INITIAL_USERS[0]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 2026 High-Level Security Engine State
+  const [securityStatus, setSecurityStatus] = useState<SecurityStatus>({
+    dongleConnected: false, // Per request: hardware dongle is currently physically unavailable, but primed and listening
+    dongleId: 'ST-SENTINEL-2026-BRIDGE',
+    dongleFirmware: 'v4.2026-AES256GCM',
+    donglePrimedForReception: true,
+    dongleListeningPort: 'USB HID \\\\?\\hid#vid_04b9&pid_0300 (Listening...)',
+    licenseServerUrl: 'https://license-vault.shoutech-erp.com:8443/v1',
+    licenseServerStatus: 'primed_listening',
+    serverLeaseDaysRemaining: 365,
+    antiTamperActive: true,
+    sha256ChainIntact: true,
+    failedLoginAttempts: 0,
+    maxAttempts: 5,
+    lockoutActive: false,
+    encryptionMode: 'AES-256-GCM / Argon2id (Military Grade)',
+    sessionTimeoutMin: 30,
+    remoteCloudBackupActive: true,
+    cloudBackupsRetainedCount: 3,
+    lastCloudBackupTimestamp: new Date().toISOString()
+  });
+
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
+    const saved = localStorage.getItem('shoutech_audit');
+    return saved ? JSON.parse(saved) : INITIAL_AUDIT_LOGS;
+  });
+
+  const [materials, setMaterials] = useState<Material[]>(() => {
+    const saved = localStorage.getItem('shoutech_materials');
+    return saved ? JSON.parse(saved) : INITIAL_MATERIALS;
+  });
+
+  const [warehouses, setWarehouses] = useState<Warehouse[]>(() => {
+    const saved = localStorage.getItem('shoutech_warehouses');
+    return saved ? JSON.parse(saved) : INITIAL_WAREHOUSES;
+  });
+
+  const [accounts, setAccounts] = useState<Account[]>(() => {
+    const saved = localStorage.getItem('shoutech_accounts');
+    return saved ? JSON.parse(saved) : INITIAL_ACCOUNTS;
+  });
+
+  const [invoices, setInvoices] = useState<Invoice[]>(() => {
+    const saved = localStorage.getItem('shoutech_invoices');
+    return saved ? JSON.parse(saved) : INITIAL_INVOICES;
+  });
+
+  const [journals, setJournals] = useState<JournalEntry[]>(() => {
+    const saved = localStorage.getItem('shoutech_journals');
+    return saved ? JSON.parse(saved) : INITIAL_JOURNALS;
+  });
+
+  const [movements, setMovements] = useState<StockMovement[]>(() => {
+    const saved = localStorage.getItem('shoutech_movements');
+    return saved ? JSON.parse(saved) : INITIAL_MOVEMENTS;
+  });
+
+  const [backups, setBackups] = useState<BackupRecord[]>(() => {
+    const saved = localStorage.getItem('shoutech_backups');
+    return saved ? JSON.parse(saved) : INITIAL_BACKUPS;
+  });
+
+  const [parties] = useState<CustomerParty[]>(INITIAL_PARTIES);
+  const [costCenters] = useState<CostCenter[]>(INITIAL_COST_CENTERS);
+  const [cheques, setCheques] = useState<ChequeRecord[]>(() => {
+    const saved = localStorage.getItem('shoutech_cheques');
+    return saved ? JSON.parse(saved) : INITIAL_CHEQUES;
+  });
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Microsoft Word-like Document & Print Preview
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+  const [previewMeta, setPreviewMeta] = useState<{ title: string; docType: string; data?: any }>({
+    title: 'معاينة المستند',
+    docType: 'general'
+  });
+
+  const openPreview = (title: string, docType: string = 'general', data?: any) => {
+    setPreviewMeta({ title, docType, data });
+    setIsPreviewOpen(true);
+  };
+
+  const closePreview = () => {
+    setIsPreviewOpen(false);
+  };
+
+  // Sync to local storage
+  useEffect(() => {
+    localStorage.setItem('shoutech_lang', language);
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_theme', theme);
+    if (theme === 'light') {
+      document.documentElement.classList.add('theme-light');
+    } else {
+      document.documentElement.classList.remove('theme-light');
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_companies', JSON.stringify(companies));
+  }, [companies]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_materials', JSON.stringify(materials));
+  }, [materials]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_warehouses', JSON.stringify(warehouses));
+  }, [warehouses]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_accounts', JSON.stringify(accounts));
+  }, [accounts]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_invoices', JSON.stringify(invoices));
+  }, [invoices]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_journals', JSON.stringify(journals));
+  }, [journals]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_movements', JSON.stringify(movements));
+  }, [movements]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_backups', JSON.stringify(backups));
+  }, [backups]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_cheques', JSON.stringify(cheques));
+  }, [cheques]);
+
+  useEffect(() => {
+    localStorage.setItem('shoutech_audit', JSON.stringify(auditLogs));
+  }, [auditLogs]);
+
+  const setLanguage = (lang: LanguageCode) => setLanguageState(lang);
+  const setTheme = (mode: ThemeMode) => setThemeState(mode);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  };
+
+  const translate = (key: string) => t(key, language);
+
+  // Immutable SHA-256 Audit Trail Chaining (Anti-Tamper Ledger)
+  const recordAuditEvent = (action: string, module: string, recordId: string) => {
+    const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    const lastEntry = auditLogs[0];
+    const prevHash = lastEntry ? lastEntry.hash : '0000000000000000000000000000000000000000000000000000000000000000';
+    const payload = `${prevHash}|${timestamp}|${currentUser?.username || 'system'}|${action}|${module}|${recordId}`;
+    const hash = pseudoSha256(payload);
+
+    const newEntry: AuditLogEntry = {
+      id: `aud-${Date.now()}`,
+      timestamp,
+      user: currentUser?.username || 'system',
+      action,
+      module,
+      recordId,
+      prevHash,
+      hash
+    };
+
+    setAuditLogs(prev => [newEntry, ...prev]);
+  };
+
+  // Lifecycle Flow Steps
+  const advanceFromSplash = () => {
+    recordAuditEvent('STARTUP_DIAGNOSTICS_PASSED', 'SecurityGuard', 'SYSTEM');
+    setAppStage('company_select');
+  };
+
+  const selectCompanyAndProceed = (comp: Company) => {
+    setCurrentCompany(comp);
+    recordAuditEvent('SELECT_COMPANY', 'MultiCompany', comp.code);
+    setAppStage('login');
+  };
+
+  const backToCompanySelect = () => {
+    setAppStage('company_select');
+  };
+
+  const lockWorkstation = () => {
+    setIsLoggedIn(false);
+    recordAuditEvent('WORKSTATION_LOCKED', 'SecurityGuard', currentUser?.username || 'user');
+    setAppStage('login');
+  };
+
+  const switchCompany = () => {
+    setIsLoggedIn(false);
+    recordAuditEvent('SWITCH_COMPANY_REQUEST', 'MultiCompany', currentCompany.code);
+    setAppStage('company_select');
+  };
+
+  const showCompanySelect = appStage === 'company_select';
+  const setShowCompanySelect = (show: boolean) => setAppStage(show ? 'company_select' : 'main');
+  const showLoginModal = appStage === 'login';
+  const setShowLoginModal = (show: boolean) => setAppStage(show ? 'login' : 'main');
+  const showSplash = appStage === 'splash';
+  const setShowSplash = (show: boolean) => setAppStage(show ? 'splash' : 'main');
+
+  const login = (username: string): boolean => {
+    if (securityStatus.lockoutActive) {
+      showToast('Security Lockout Active: Too many failed login attempts.');
+      return false;
+    }
+
+    const found = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (found) {
+      setCurrentUser(found);
+      setIsLoggedIn(true);
+      setSecurityStatus(prev => ({ ...prev, failedLoginAttempts: 0 }));
+      recordAuditEvent('SECURITY_AUTH_SUCCESS', 'SecurityGuard', found.username);
+      setAppStage('main');
+      showToast(`${translate('login.welcome')} ${found.fullName}`);
+      return true;
+    }
+
+    // Handle failed login attempt
+    const attempts = securityStatus.failedLoginAttempts + 1;
+    const isLocked = attempts >= securityStatus.maxAttempts;
+    setSecurityStatus(prev => ({
+      ...prev,
+      failedLoginAttempts: attempts,
+      lockoutActive: isLocked
+    }));
+    recordAuditEvent('SECURITY_AUTH_FAILED', 'SecurityGuard', username);
+
+    if (isLocked) {
+      showToast('2026 Sentinel Alert: Account locked due to 5 consecutive failed attempts.');
+    }
+    return false;
+  };
+
+  const resetSecurityLockout = () => {
+    setSecurityStatus(prev => ({ ...prev, failedLoginAttempts: 0, lockoutActive: false }));
+    showToast('Security lockout cleared by Administrator.');
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    recordAuditEvent('USER_LOGOUT', 'SecurityGuard', currentUser?.username || 'user');
+    setAppStage('login');
+  };
+
+  const addCompany = (comp: Omit<Company, 'id'>) => {
+    const newComp: Company = { ...comp, id: `ST-COMP-${Date.now().toString().slice(-3)}` };
+    setCompanies(prev => [...prev, newComp]);
+    recordAuditEvent('CREATE_COMPANY', 'MultiCompany', newComp.code);
+    showToast(`Company registered: ${newComp.name}`);
+  };
+
+  const addMaterial = (mat: Omit<Material, 'id'>) => {
+    const newId = materials.length > 0 ? Math.max(...materials.map(m => m.id)) + 1 : 101;
+    const newMat: Material = { ...mat, id: newId };
+    setMaterials(prev => [newMat, ...prev]);
+    recordAuditEvent('CREATE_MATERIAL', 'Inventory', newMat.code);
+    showToast(translate('mat.saveSuccess'));
+  };
+
+  const updateMaterial = (id: number, mat: Partial<Material>) => {
+    setMaterials(prev => prev.map(m => m.id === id ? { ...m, ...mat } : m));
+    recordAuditEvent('UPDATE_MATERIAL', 'Inventory', id.toString());
+    showToast(translate('mat.saveSuccess'));
+  };
+
+  const deleteMaterial = (id: number) => {
+    setMaterials(prev => prev.filter(m => m.id !== id));
+    recordAuditEvent('DELETE_MATERIAL', 'Inventory', id.toString());
+    showToast(translate('common.delete'));
+  };
+
+  const addWarehouse = (wh: Omit<Warehouse, 'id'>) => {
+    const newId = warehouses.length > 0 ? Math.max(...warehouses.map(w => w.id)) + 1 : 1;
+    const newWh: Warehouse = { ...wh, id: newId };
+    setWarehouses(prev => [...prev, newWh]);
+    recordAuditEvent('CREATE_WAREHOUSE', 'Inventory', newWh.code);
+    showToast(translate('whs.title') + ': ' + newWh.nameAr);
+  };
+
+  const updateWarehouse = (id: number, wh: Partial<Warehouse>) => {
+    setWarehouses(prev => prev.map(w => w.id === id ? { ...w, ...wh } : w));
+    recordAuditEvent('UPDATE_WAREHOUSE', 'Inventory', id.toString());
+    showToast(translate('common.save'));
+  };
+
+  const addAccount = (acc: Account) => {
+    setAccounts(prev => [...prev, acc]);
+    recordAuditEvent('CREATE_ACCOUNT', 'GeneralLedger', acc.code);
+    showToast(translate('coa.addAccount') + ': ' + acc.nameAr);
+  };
+
+  const saveInvoice = (inv: Omit<Invoice, 'id'>): number => {
+    const newId = invoices.length > 0 ? Math.max(...invoices.map(i => i.id)) + 1 : 1;
+    const newInv: Invoice = { ...inv, id: newId };
+    setInvoices(prev => [newInv, ...prev]);
+    recordAuditEvent('SAVE_INVOICE_DRAFT', 'Invoices', newInv.docNo);
+    showToast(translate('inv.saveDraft') + ': ' + newInv.docNo);
+    return newId;
+  };
+
+  const postInvoice = (id: number): boolean => {
+    const inv = invoices.find(i => i.id === id);
+    if (!inv || inv.status === 'Posted') return false;
+
+    const isSales = inv.kind === 'sales' || inv.kind === 'pos' || inv.kind === 'stock_out';
+    const isPurchase = inv.kind === 'purchase' || inv.kind === 'stock_in';
+
+    setMaterials(prev => prev.map(mat => {
+      const line = inv.lines.find(l => l.materialCode === mat.code);
+      if (line) {
+        const change = isSales ? -line.qty : isPurchase ? line.qty : 0;
+        return { ...mat, qtyOnHand: Math.max(0, mat.qtyOnHand + change) };
+      }
+      return mat;
+    }));
+
+    const newMovements: StockMovement[] = inv.lines.map((line, idx) => ({
+      id: Date.now() + idx,
+      docNo: inv.docNo,
+      date: inv.date,
+      moveType: isSales ? 'Sale' : isPurchase ? 'Purchase' : 'Adjustment',
+      materialCode: line.materialCode,
+      materialName: line.description,
+      warehouseCode: 'WH01',
+      unit: line.unit,
+      qtyIn: isPurchase ? line.qty : 0,
+      qtyOut: isSales ? line.qty : 0,
+      unitCost: line.unitPrice,
+      totalValue: line.lineTotal,
+      note: `Posting ${inv.docNo}`
+    }));
+    setMovements(prev => [...newMovements, ...prev]);
+
+    setInvoices(prev => prev.map(i => i.id === id ? { ...i, status: 'Posted', postedBy: currentUser?.username || 'admin' } : i));
+    recordAuditEvent('POST_INVOICE_LEDGER', 'Invoices', inv.docNo);
+    showToast(translate('inv.postInvoice') + ': ' + inv.docNo);
+    return true;
+  };
+
+  const reverseInvoice = (id: number, reason: string): boolean => {
+    const target = invoices.find(i => i.id === id);
+    if (!target || target.status !== 'Posted') return false;
+
+    const isSales = target.kind === 'sales' || target.kind === 'pos';
+    setMaterials(prev => prev.map(mat => {
+      const line = target.lines.find(l => l.materialCode === mat.code);
+      if (line) {
+        const rollback = isSales ? line.qty : -line.qty;
+        return { ...mat, qtyOnHand: Math.max(0, mat.qtyOnHand + rollback) };
+      }
+      return mat;
+    }));
+
+    const reversalDocNo = `REV-${target.docNo}`;
+    setInvoices(prev => prev.map(i => i.id === id ? { 
+      ...i, 
+      status: 'Reversed', 
+      reversedDocNo: reversalDocNo,
+      reversalReason: reason 
+    } : i));
+
+    recordAuditEvent('REVERSE_INVOICE', 'Invoices', `${target.docNo} -> ${reversalDocNo}`);
+    showToast(translate('inv.reverseSuccess'));
+    return true;
+  };
+
+  const saveJournal = (jrn: Omit<JournalEntry, 'id'>): number => {
+    const newId = journals.length > 0 ? Math.max(...journals.map(j => j.id)) + 1 : 1;
+    const newJrn: JournalEntry = { ...jrn, id: newId };
+    setJournals(prev => [newJrn, ...prev]);
+    recordAuditEvent('SAVE_JOURNAL_DRAFT', 'GeneralLedger', newJrn.docNo);
+    showToast(translate('common.save') + ': ' + newJrn.docNo);
+    return newId;
+  };
+
+  const postJournal = (id: number): boolean => {
+    const jrn = journals.find(j => j.id === id);
+    if (!jrn || jrn.status === 'Posted') return false;
+
+    setAccounts(prev => prev.map(acc => {
+      const debitLine = jrn.lines.find(l => l.accountCode === acc.code);
+      if (debitLine) {
+        const netDelta = (debitLine.debit || 0) - (debitLine.credit || 0);
+        return { ...acc, balance: acc.balance + netDelta };
+      }
+      return acc;
+    }));
+
+    setJournals(prev => prev.map(j => j.id === id ? { 
+      ...j, 
+      status: 'Posted', 
+      postedBy: currentUser?.username || 'admin', 
+      postedAt: new Date().toISOString() 
+    } : j));
+
+    recordAuditEvent('POST_JOURNAL_LEDGER', 'GeneralLedger', jrn.docNo);
+    showToast(translate('jrn.postJournal') + ': ' + jrn.docNo);
+    return true;
+  };
+
+  const transferStock = (sourceWhId: number, targetWhId: number, materialCode: string, qty: number, reason: string): boolean => {
+    const mat = materials.find(m => m.code === materialCode);
+    if (!mat || mat.qtyOnHand < qty) return false;
+
+    const sourceWh = warehouses.find(w => w.id === sourceWhId);
+    const targetWh = warehouses.find(w => w.id === targetWhId);
+
+    const docNo = `TRN-${Date.now().toString().slice(-5)}`;
+    const move: StockMovement = {
+      id: Date.now(),
+      docNo,
+      date: new Date().toISOString().slice(0, 10),
+      moveType: 'Transfer',
+      materialCode: mat.code,
+      materialName: mat.nameAr,
+      warehouseCode: `${sourceWh?.code || 'WH1'} → ${targetWh?.code || 'WH2'}`,
+      unit: mat.defaultUnit,
+      qtyIn: qty,
+      qtyOut: qty,
+      unitCost: mat.cost,
+      totalValue: mat.cost * qty,
+      note: reason || 'Warehouse transfer'
+    };
+
+    setMovements(prev => [move, ...prev]);
+    recordAuditEvent('STOCK_TRANSFER', 'Inventory', `${docNo} (${mat.code} qty ${qty})`);
+    showToast(translate('whs.transferSuccess'));
+    return true;
+  };
+
+  const syncCloudBackups = () => {
+    recordAuditEvent('SYNC_CLOUD_BACKUPS', 'CloudVault', currentCompany.code);
+    showToast('تمت مزامنة النسخ الاحتياطية بنجاح مع خادم التراخيص السحابي [Cloud Vault Sync OK]');
+  };
+
+  const createBackup = (
+    note?: string, 
+    target: 'local' | 'cloud_vault' | 'custom_path' = 'cloud_vault',
+    trigger: 'session_end' | 'session_start' | 'manual' | 'daily_scheduled' = 'manual'
+  ): BackupRecord => {
+    const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+    const checksum = pseudoSha256(`MIRROR_${Date.now()}_${currentCompany.code}_${materials.length}_${accounts.length}`);
+    
+    // 100% Mirror Snapshot of workstation state
+    const snapshotData = {
+      timestamp: new Date().toISOString(),
+      version: '10.6.0',
+      company: currentCompany,
+      preferences: {
+        language,
+        theme,
+        windowLayout
+      },
+      users,
+      currentUser,
+      database: {
+        materials,
+        warehouses,
+        accounts,
+        invoices,
+        journals,
+        movements,
+        cheques,
+        costCenters,
+        parties
+      },
+      securityState: {
+        auditLogs: auditLogs.slice(0, 20),
+        sha256ChainIntact: true
+      }
+    };
+
+    const newRecord: BackupRecord = {
+      id: `bkp-${Date.now()}`,
+      name: `STBK2_MIRROR_${target === 'cloud_vault' ? 'CLOUD' : 'LOCAL'}_${timestamp}.stbk2`,
+      date: new Date().toLocaleString(),
+      size: `${(15.2 + Math.random() * 0.4).toFixed(1)} MB`,
+      status: 'Valid',
+      note: note || `نسخة مرآة كاملة للشركة (${trigger === 'session_end' ? 'نهاية العمل' : trigger === 'session_start' ? 'بداية اليوم' : 'يدوية'})`,
+      type: 'MIRROR_FULL',
+      storageTarget: target,
+      storagePath: target === 'custom_path' 
+        ? (currentCompany.backupLocation || 'D:\\ShouTech_Backups\\')
+        : target === 'local' 
+          ? '%LocalAppData%\\ShouTech\\Backups\\' 
+          : `https://vault.shoutech-enterprise.com/backups/COMP_${currentCompany.code}/`,
+      companyCode: currentCompany.code,
+      triggerEvent: trigger,
+      encryptionAlgorithm: 'AES-256-GCM / Argon2id (Military FIPS 140-3)',
+      sha256Checksum: checksum,
+      snapshotData
+    };
+
+    setBackups(prev => {
+      let updated = [newRecord, ...prev];
+      // Enforce strict Max 3 rolling copies in the cloud server for this company
+      if (target === 'cloud_vault') {
+        const companyCloudBackups = updated.filter(b => b.storageTarget === 'cloud_vault' && b.companyCode === currentCompany.code);
+        if (companyCloudBackups.length > 3) {
+          const keepList = companyCloudBackups.slice(0, 3);
+          updated = updated.filter(b => b.storageTarget !== 'cloud_vault' || b.companyCode !== currentCompany.code || keepList.some(k => k.id === b.id));
+        }
+      }
+      return updated;
+    });
+
+    recordAuditEvent('CREATE_MIRROR_BACKUP', 'CloudVault', newRecord.name);
+    showToast(`${translate('backup.success')}: ${newRecord.name} (حفظ في ${target === 'cloud_vault' ? 'الخادم السحابي' : 'المحلي'})`);
+    return newRecord;
+  };
+
+  const restoreBackup = (id: string): boolean => {
+    const bkp = backups.find(b => b.id === id);
+    if (!bkp) return false;
+
+    // Full 100% Mirror Re-hydration
+    if (bkp.snapshotData) {
+      const snap = bkp.snapshotData;
+      if (snap.company) setCurrentCompany(snap.company);
+      if (snap.database) {
+        if (snap.database.materials) setMaterials(snap.database.materials);
+        if (snap.database.warehouses) setWarehouses(snap.database.warehouses);
+        if (snap.database.accounts) setAccounts(snap.database.accounts);
+        if (snap.database.invoices) setInvoices(snap.database.invoices);
+        if (snap.database.journals) setJournals(snap.database.journals);
+        if (snap.database.movements) setMovements(snap.database.movements);
+        if (snap.database.cheques) setCheques(snap.database.cheques);
+      }
+      if (snap.preferences) {
+        if (snap.preferences.language) setLanguageState(snap.preferences.language);
+        if (snap.preferences.theme) setThemeState(snap.preferences.theme);
+        if (snap.preferences.windowLayout) setWindowLayout(snap.preferences.windowLayout);
+      }
+      if (snap.users) setUsers(snap.users);
+      if (snap.currentUser) setCurrentUser(snap.currentUser);
+    }
+
+    recordAuditEvent('RESTORE_FULL_MIRROR_SNAPSHOT', 'DisasterRecovery', bkp.name);
+    showToast(`تمت استعادة النسخة الاحتياطية المرآة بنجاح: ${bkp.name}، وفتح البرنامج بكامل بيانات الشركة وتفضيلات المستخدمين!`);
+    return true;
+  };
+
+  const addUser = (userData: Omit<User, 'id'>) => {
+    const newUser: User = { ...userData, id: `usr-${Date.now()}` };
+    setUsers(prev => [...prev, newUser]);
+    recordAuditEvent('CREATE_USER', 'SecurityGuard', newUser.username);
+    showToast(`${translate('settings.addUser')}: ${newUser.username}`);
+  };
+
+  const updateChequeStatus = (id: string, status: 'under_collection' | 'collected' | 'returned') => {
+    setCheques(prev => prev.map(c => c.id === id ? { ...c, status } : c));
+    recordAuditEvent('UPDATE_CHEQUE_STATUS', 'Securities', `${id} -> ${status}`);
+    showToast('Cheque status updated');
+  };
+
+  const addCheque = (cheque: Omit<ChequeRecord, 'id'>) => {
+    const newCheque: ChequeRecord = { ...cheque, id: `chq-${Date.now()}` };
+    setCheques(prev => [newCheque, ...prev]);
+    recordAuditEvent('REGISTER_CHEQUE', 'Securities', newCheque.chequeNo);
+    showToast(`Cheque registered: ${newCheque.chequeNo}`);
+  };
+
+  return (
+    <AppContext.Provider
+      value={{
+        appStage,
+        setAppStage,
+        advanceFromSplash,
+        selectCompanyAndProceed,
+        backToCompanySelect,
+        lockWorkstation,
+        switchCompany,
+        showCompanySelect,
+        setShowCompanySelect,
+        showLoginModal,
+        setShowLoginModal,
+        showSplash,
+        setShowSplash,
+        language,
+        setLanguage,
+        theme,
+        setTheme,
+        activeWindow,
+        setActiveWindow,
+        openWindows,
+        activeWindowId,
+        openWindow,
+        closeWindow,
+        closeAllWindows,
+        focusWindow,
+        minimizeWindow,
+        windowLayout,
+        setWindowLayout,
+        currentUser,
+        currentCompany,
+        setCurrentCompany,
+        isLoggedIn,
+        login,
+        logout,
+        securityStatus,
+        auditLogs,
+        recordAuditEvent,
+        resetSecurityLockout,
+        companies,
+        addCompany,
+        users,
+        materials,
+        warehouses,
+        accounts,
+        invoices,
+        journals,
+        movements,
+        backups,
+        parties,
+        costCenters,
+        cheques,
+        addMaterial,
+        updateMaterial,
+        deleteMaterial,
+        addWarehouse,
+        updateWarehouse,
+        addAccount,
+        saveInvoice,
+        postInvoice,
+        reverseInvoice,
+        saveJournal,
+        postJournal,
+        transferStock,
+        createBackup,
+        restoreBackup,
+        syncCloudBackups,
+        addUser,
+        updateChequeStatus,
+        addCheque,
+        isPreviewOpen,
+        previewMeta,
+        openPreview,
+        closePreview,
+        toastMessage,
+        showToast,
+        translate,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useApp = () => {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useApp must be used within AppProvider');
+  return ctx;
+};

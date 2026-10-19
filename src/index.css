@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #1E1E1E;
+    --surface: #2D2D2D;
+    --surface-light: #3D3D3D;
+    --surface-dark: #1A1A1A;
+    --primary: #0078D4;
+    --primary-hover: #1084D9;
+    --primary-dark: #005A9E;
+    --accent: #FF6B35;
+    --accent-hover: #FF7D4D;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --border-color: #3F3F46;
+    --table-header: #242424;
+    --table-row-alt: #262626;
+    --success: #107C10;
+    --warning: #FFB900;
+    --danger: #D13438;
+  }
+
+  .theme-light {
+    --bg-main: #F3F3F3;
+    --surface: #FFFFFF;
+    --surface-light: #F8F9FA;
+    --surface-dark: #E5E5E5;
+    --primary: #0067B8;
+    --primary-hover: #0078D4;
+    --primary-dark: #004578;
+    --accent: #D83B01;
+    --accent-hover: #EA4300;
+    --text-primary: #1A1A1A;
+    --text-secondary: #5F6368;
+    --border-color: #D1D5DB;
+    --table-header: #EAEAEA;
+    --table-row-alt: #F9FAFB;
+    --success: #0E700E;
+    --warning: #B27B00;
+    --danger: #C42B1C;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, 'Cairo', system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Windows-style scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.7);
+}

@@ -1,0 +1,8 @@
+{
+  "name": "ShouTech ERP",
+  "description": "Commercial integrated Enterprise Resource Planning (ERP) platform with General Ledger, Multi-Warehouse Inventory, Invoicing, Point of Sale (POS), Multi-Language (Arabic/English/French/Turkish) support, and Ribbon workspace.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
