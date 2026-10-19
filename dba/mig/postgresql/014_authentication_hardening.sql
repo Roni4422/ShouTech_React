@@ -66,5 +66,5 @@ $$;
 
 DROP TRIGGER IF EXISTS trg_user_sessions_company ON user_sessions;
 CREATE TRIGGER trg_user_sessions_company
-BEFORE INSERT OR UPDATE OF user_id, company_id ON user_sessions
+BEFORE INSERT OR UPDATE ON user_sessions
 FOR EACH ROW EXECUTE FUNCTION enforce_user_session_company();
