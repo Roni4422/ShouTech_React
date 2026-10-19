@@ -1,13 +1,13 @@
 {
   "Application": {
-    "Name": "شو تيك لإدارة المؤسسات",
+    "Name": "ShouTech Enterprise Management System",
     "NameEn": "ShouTech Enterprise Management System",
-    "ShortName": "شو تيك ERP",
+    "ShortName": "ShouTech ERP",
     "ShortNameEn": "ShouTech ERP",
     "Version": "10.6.0",
     "Build": "20260801",
     "BuildDate": "2026-08-01T00:00:00",
-    "Company": "شو تيك للبرمجيات",
+    "Company": "ShouTech Software",
     "CompanyEn": "ShouTech Software",
     "Copyright": "© 2026 ShouTech. All rights reserved.",
     "Website": "https://www.shoutech.com",
@@ -29,14 +29,14 @@
   },
   "Company": {
     "Id": "ST-COMP-001",
-    "Name": "شو تيك للبرمجيات",
+    "Name": "ShouTech Software",
     "NameEn": "ShouTech Software",
-    "CommercialName": "شو تيك",
+    "CommercialName": "ShouTech",
     "CommercialNameEn": "ShouTech",
     "TaxId": "123456789",
     "CommercialRegister": "CR-2024-001",
     "VATNumber": "VAT-123456789",
-    "Address": "دمشق - سوريا",
+    "Address": "Damascus - Syria",
     "AddressEn": "Damascus - Syria",
     "Phone": "+963 11 1234567",
     "Mobile": "+963 944 123456",
@@ -235,7 +235,7 @@
     "Available": [
       {
         "Code": "ar",
-        "Name": "العربية",
+        "Name": "Arabic",
         "NameEn": "Arabic",
         "Culture": "ar-SY",
         "IsRTL": true,
@@ -263,7 +263,7 @@
       },
       {
         "Code": "fr",
-        "Name": "Français",
+        "Name": "French",
         "NameEn": "French",
         "Culture": "fr-FR",
         "IsRTL": false,
@@ -277,7 +277,7 @@
       },
       {
         "Code": "ku",
-        "Name": "کوردی",
+        "Name": "Kurdish",
         "NameEn": "Kurdish",
         "Culture": "ku-Arab",
         "IsRTL": true,
@@ -291,7 +291,7 @@
       },
       {
         "Code": "tr",
-        "Name": "Türkçe",
+        "Name": "Turkish",
         "NameEn": "Turkish",
         "Culture": "tr-TR",
         "IsRTL": false,
@@ -313,17 +313,17 @@
   },
   "Currency": {
     "DefaultCode": "SYP",
-    "DefaultSymbol": "ل.س",
+    "DefaultSymbol": "SYP",
     "SystemCurrency": {
       "Code": "SYP",
-      "Name": "ليرة سورية",
+      "Name": "Syrian Pound",
       "NameEn": "Syrian Pound",
-      "Symbol": "ل.س",
+      "Symbol": "SYP",
       "DecimalPlaces": 2,
-      "SubUnitName": "قرش",
+      "SubUnitName": "Piastre",
       "SubUnitRatio": 100,
       "Format": "{0:N2} {1}",
-      "ExchangeRate": 1.0,
+      "ExchangeRate": 1,
       "IsActive": true,
       "IsDefault": true,
       "Position": "Before",
@@ -333,14 +333,14 @@
     "Available": [
       {
         "Code": "SYP",
-        "Name": "ليرة سورية",
+        "Name": "Syrian Pound",
         "NameEn": "Syrian Pound",
-        "Symbol": "ل.س",
+        "Symbol": "SYP",
         "DecimalPlaces": 2,
-        "SubUnitName": "قرش",
+        "SubUnitName": "Piastre",
         "SubUnitRatio": 100,
         "Format": "{0:N2} {1}",
-        "ExchangeRate": 1.0,
+        "ExchangeRate": 1,
         "IsActive": true,
         "IsDefault": true,
         "Position": "Before",
@@ -349,14 +349,14 @@
       },
       {
         "Code": "USD",
-        "Name": "دولار أمريكي",
+        "Name": "US Dollar",
         "NameEn": "US Dollar",
         "Symbol": "$",
         "DecimalPlaces": 2,
-        "SubUnitName": "سنت",
+        "SubUnitName": "Cent",
         "SubUnitRatio": 100,
         "Format": "${0:N2}",
-        "ExchangeRate": 12500.0,
+        "ExchangeRate": 12500,
         "IsActive": true,
         "IsDefault": false,
         "Position": "Before",
@@ -365,14 +365,14 @@
       },
       {
         "Code": "EUR",
-        "Name": "يورو",
+        "Name": "Euro",
         "NameEn": "Euro",
         "Symbol": "€",
         "DecimalPlaces": 2,
-        "SubUnitName": "سنت",
+        "SubUnitName": "Cent",
         "SubUnitRatio": 100,
         "Format": "€{0:N2}",
-        "ExchangeRate": 13500.0,
+        "ExchangeRate": 13500,
         "IsActive": true,
         "IsDefault": false,
         "Position": "Before",
@@ -381,14 +381,14 @@
       },
       {
         "Code": "GBP",
-        "Name": "جنيه إسترليني",
+        "Name": "British Pound",
         "NameEn": "British Pound",
         "Symbol": "£",
         "DecimalPlaces": 2,
-        "SubUnitName": "بنس",
+        "SubUnitName": "Penny",
         "SubUnitRatio": 100,
         "Format": "£{0:N2}",
-        "ExchangeRate": 15800.0,
+        "ExchangeRate": 15800,
         "IsActive": true,
         "IsDefault": false,
         "Position": "Before",
@@ -397,14 +397,14 @@
       },
       {
         "Code": "TRY",
-        "Name": "ليرة تركية",
+        "Name": "Turkish Lira",
         "NameEn": "Turkish Lira",
         "Symbol": "₺",
         "DecimalPlaces": 2,
-        "SubUnitName": "كوروش",
+        "SubUnitName": "Kurus",
         "SubUnitRatio": 100,
         "Format": "₺{0:N2}",
-        "ExchangeRate": 1500.0,
+        "ExchangeRate": 1500,
         "IsActive": true,
         "IsDefault": false,
         "Position": "Before",
@@ -419,10 +419,10 @@
       "BaseCurrency": "SYP",
       "UseManualRates": true,
       "ManualRates": {
-        "USD": 12500.0,
-        "EUR": 13500.0,
-        "GBP": 15800.0,
-        "TRY": 1500.0
+        "USD": 12500,
+        "EUR": 13500,
+        "GBP": 15800,
+        "TRY": 1500
       }
     },
     "Rounding": {
@@ -459,9 +459,9 @@
     "AllModules": [
       {
         "Id": "Core",
-        "Name": "النواة الأساسية",
+        "Name": "Core",
         "NameEn": "Core",
-        "Description": "الوحدة الأساسية للتطبيق",
+        "Description": "Core module",
         "DescriptionEn": "Core module",
         "Version": "10.6.0",
         "Order": 0,
@@ -472,9 +472,9 @@
       },
       {
         "Id": "Inventory",
-        "Name": "المخزون",
+        "Name": "Inventory",
         "NameEn": "Inventory",
-        "Description": "إدارة المخزون والمنتجات والمستودعات",
+        "Description": "Manage inventory, products and warehouses",
         "DescriptionEn": "Manage inventory, products and warehouses",
         "Version": "10.6.0",
         "Order": 10,
@@ -487,9 +487,9 @@
       },
       {
         "Id": "Sales",
-        "Name": "المبيعات",
+        "Name": "Sales",
         "NameEn": "Sales",
-        "Description": "إدارة فواتير المبيعات والعملاء",
+        "Description": "Manage sales invoices and customers",
         "DescriptionEn": "Manage sales invoices and customers",
         "Version": "10.6.0",
         "Order": 20,
@@ -503,9 +503,9 @@
       },
       {
         "Id": "Purchases",
-        "Name": "المشتريات",
+        "Name": "Purchases",
         "NameEn": "Purchases",
-        "Description": "إدارة أوامر الشراء والموردين",
+        "Description": "Manage purchase orders and suppliers",
         "DescriptionEn": "Manage purchase orders and suppliers",
         "Version": "10.6.0",
         "Order": 30,
@@ -519,9 +519,9 @@
       },
       {
         "Id": "POS",
-        "Name": "نقاط البيع",
+        "Name": "Point of Sale",
         "NameEn": "Point of Sale",
-        "Description": "نظام نقاط البيع المتكامل",
+        "Description": "Integrated Point of Sale system",
         "DescriptionEn": "Integrated Point of Sale system",
         "Version": "10.6.0",
         "Order": 40,
@@ -536,9 +536,9 @@
       },
       {
         "Id": "Accounting",
-        "Name": "المحاسبة",
+        "Name": "Accounting",
         "NameEn": "Accounting",
-        "Description": "نظام المحاسبة المالي المتكامل",
+        "Description": "Integrated financial accounting system",
         "DescriptionEn": "Integrated financial accounting system",
         "Version": "10.6.0",
         "Order": 50,
@@ -551,9 +551,9 @@
       },
       {
         "Id": "Customers",
-        "Name": "إدارة العملاء",
+        "Name": "Customers Management",
         "NameEn": "Customers Management",
-        "Description": "إدارة بيانات العملاء والحسابات",
+        "Description": "Manage customer data and accounts",
         "DescriptionEn": "Manage customer data and accounts",
         "Version": "10.6.0",
         "Order": 60,
@@ -567,9 +567,9 @@
       },
       {
         "Id": "Suppliers",
-        "Name": "إدارة الموردين",
+        "Name": "Suppliers Management",
         "NameEn": "Suppliers Management",
-        "Description": "إدارة بيانات الموردين والحسابات",
+        "Description": "Manage supplier data and accounts",
         "DescriptionEn": "Manage supplier data and accounts",
         "Version": "10.6.0",
         "Order": 70,
@@ -583,9 +583,9 @@
       },
       {
         "Id": "Manufacturing",
-        "Name": "التصنيع والإنتاج",
+        "Name": "Manufacturing",
         "NameEn": "Manufacturing",
-        "Description": "إدارة عمليات التصنيع والإنتاج",
+        "Description": "Manage manufacturing and production",
         "DescriptionEn": "Manage manufacturing and production",
         "Version": "10.6.0",
         "Order": 80,
@@ -599,9 +599,9 @@
       },
       {
         "Id": "HumanResources",
-        "Name": "الموارد البشرية",
+        "Name": "Human Resources",
         "NameEn": "Human Resources",
-        "Description": "إدارة الموظفين والرواتب والحضور",
+        "Description": "Manage employees, payroll and attendance",
         "DescriptionEn": "Manage employees, payroll and attendance",
         "Version": "10.6.0",
         "Order": 90,
@@ -614,9 +614,9 @@
       },
       {
         "Id": "CRM",
-        "Name": "إدارة علاقات العملاء",
+        "Name": "CRM",
         "NameEn": "CRM",
-        "Description": "إدارة العملاء المحتملين والفرص والمتابعات",
+        "Description": "Manage leads, opportunities and follow-ups",
         "DescriptionEn": "Manage leads, opportunities and follow-ups",
         "Version": "10.6.0",
         "Order": 100,
@@ -630,9 +630,9 @@
       },
       {
         "Id": "Reports",
-        "Name": "التقارير",
+        "Name": "Reports",
         "NameEn": "Reports",
-        "Description": "نظام التقارير المتكامل ولوحات القيادة",
+        "Description": "Integrated reporting and dashboards",
         "DescriptionEn": "Integrated reporting and dashboards",
         "Version": "10.6.0",
         "Order": 110,
@@ -645,9 +645,9 @@
       },
       {
         "Id": "Banks",
-        "Name": "البنوك",
+        "Name": "Banks",
         "NameEn": "Banks",
-        "Description": "إدارة الحسابات البنكية والتسويات",
+        "Description": "Manage bank accounts and reconciliations",
         "DescriptionEn": "Manage bank accounts and reconciliations",
         "Version": "10.6.0",
         "Order": 120,
@@ -661,9 +661,9 @@
       },
       {
         "Id": "Tools",
-        "Name": "الأدوات",
+        "Name": "Tools",
         "NameEn": "Tools",
-        "Description": "أدوات مساعدة وإضافات",
+        "Description": "Helper tools and add-ons",
         "DescriptionEn": "Helper tools and add-ons",
         "Version": "10.6.0",
         "Order": 130,
@@ -676,9 +676,9 @@
       },
       {
         "Id": "Settings",
-        "Name": "الإعدادات",
+        "Name": "Settings",
         "NameEn": "Settings",
-        "Description": "إعدادات النظام العامة",
+        "Description": "General system settings",
         "DescriptionEn": "General system settings",
         "Version": "10.6.0",
         "Order": 140,
@@ -691,9 +691,9 @@
       },
       {
         "Id": "Security",
-        "Name": "الأمان",
+        "Name": "Security",
         "NameEn": "Security",
-        "Description": "إدارة الأمان والصلاحيات",
+        "Description": "Manage security and permissions",
         "DescriptionEn": "Manage security and permissions",
         "Version": "10.6.0",
         "Order": 150,
@@ -706,9 +706,9 @@
       },
       {
         "Id": "Audit",
-        "Name": "التدقيق",
+        "Name": "Audit",
         "NameEn": "Audit",
-        "Description": "سجل التدقيق والمتابعة",
+        "Description": "Audit trail and monitoring",
         "DescriptionEn": "Audit trail and monitoring",
         "Version": "10.6.0",
         "Order": 160,
@@ -721,9 +721,9 @@
       },
       {
         "Id": "Notifications",
-        "Name": "الإشعارات",
+        "Name": "Notifications",
         "NameEn": "Notifications",
-        "Description": "نظام الإشعارات والتنبيهات",
+        "Description": "Notifications and alerts system",
         "DescriptionEn": "Notifications and alerts system",
         "Version": "10.6.0",
         "Order": 170,
@@ -736,9 +736,9 @@
       },
       {
         "Id": "Workflow",
-        "Name": "سير العمل",
+        "Name": "Workflow",
         "NameEn": "Workflow",
-        "Description": "إدارة مسارات العمل والموافقات",
+        "Description": "Manage workflows and approvals",
         "DescriptionEn": "Manage workflows and approvals",
         "Version": "10.6.0",
         "Order": 180,
@@ -751,9 +751,9 @@
       },
       {
         "Id": "AI",
-        "Name": "الذكاء الاصطناعي",
+        "Name": "AI",
         "NameEn": "AI",
-        "Description": "خدمات الذكاء الاصطناعي والتحليل التنبؤي",
+        "Description": "AI services and predictive analytics",
         "DescriptionEn": "AI services and predictive analytics",
         "Version": "10.6.0",
         "Order": 190,
@@ -766,9 +766,9 @@
       },
       {
         "Id": "MultiCompany",
-        "Name": "الشركات المتعددة",
+        "Name": "Multi-Company",
         "NameEn": "Multi-Company",
-        "Description": "دعم الشركات المتعددة",
+        "Description": "Multi-company support",
         "DescriptionEn": "Multi-company support",
         "Version": "10.6.0",
         "Order": 200,
@@ -1082,7 +1082,7 @@
       "SmtpPassword": "",
       "EnableSsl": true,
       "FromEmail": "",
-      "FromName": "شو تيك إي آر بي",
+      "FromName": "ShouTech ERP",
       "FromNameEn": "ShouTech ERP"
     },
     "SMS": {
@@ -1196,31 +1196,31 @@
         "Name": "DatabaseBackup",
         "Enabled": true,
         "Schedule": "0 2 * * *",
-        "Description": "النسخ الاحتياطي اليومي لقاعدة البيانات"
+        "Description": "Daily database backup"
       },
       {
         "Name": "LogCleanup",
         "Enabled": true,
         "Schedule": "0 3 * * 0",
-        "Description": "تنظيف ملفات السجل الأسبوعي"
+        "Description": "Weekly log cleanup"
       },
       {
         "Name": "CacheCleanup",
         "Enabled": true,
         "Schedule": "0 4 * * *",
-        "Description": "تنظيف ملفات الكاش اليومي"
+        "Description": "Daily cache cleanup"
       },
       {
         "Name": "DatabaseOptimization",
         "Enabled": true,
         "Schedule": "0 5 * * 0",
-        "Description": "تحسين قاعدة البيانات الأسبوعي"
+        "Description": "Weekly database optimization"
       },
       {
         "Name": "ReportGeneration",
         "Enabled": true,
         "Schedule": "0 6 * * *",
-        "Description": "توليد التقارير المجدولة اليومي"
+        "Description": "Daily scheduled report generation"
       }
     ]
   },
@@ -1310,7 +1310,7 @@
       "ShowHeader": true,
       "ShowFooter": true,
       "HeaderTemplate": "{CompanyName} - {ReportName}",
-      "FooterTemplate": "الصفحة {PageNumber} من {TotalPages} - {Date}"
+      "FooterTemplate": "Page {PageNumber} of {TotalPages} - {Date}"
     },
     "PrintPreview": {
       "Zoom": 100,
@@ -1338,7 +1338,7 @@
     "OutputPath": "./rpt/generated",
     "LogoPath": "Assets/logo.png",
     "EnableWatermark": false,
-    "WatermarkText": "عينة",
+    "WatermarkText": "Sample",
     "EnableDigitalSignature": false
   },
   "MultiCompany": {
@@ -1347,7 +1347,7 @@
     "Companies": [
       {
         "Code": "001",
-        "Name": "الشركة الرئيسية",
+        "Name": "Main Company",
         "NameEn": "Main Company",
         "Database": "SHOUTECH_MST",
         "IsDefault": true,
@@ -1360,9 +1360,9 @@
       "Branches": [
         {
           "Code": "001",
-          "Name": "الفرع الرئيسي",
+          "Name": "Main Branch",
           "NameEn": "Main Branch",
-          "Address": "دمشق",
+          "Address": "Damascus",
           "Phone": "+963 11 1234567",
           "IsDefault": true,
           "Enabled": true
@@ -1390,7 +1390,7 @@
     "Taxes": [
       {
         "Code": "VAT",
-        "Name": "ضريبة القيمة المضافة",
+        "Name": "Value Added Tax",
         "NameEn": "Value Added Tax",
         "Rate": 0.1,
         "IsDefault": true,
@@ -1399,7 +1399,7 @@
       },
       {
         "Code": "EXEMPT",
-        "Name": "معفى من الضريبة",
+        "Name": "Tax Exempt",
         "NameEn": "Tax Exempt",
         "Rate": 0,
         "IsDefault": false,
