@@ -368,10 +368,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         nameEn: company.nameEn,
         commercialName: company.nameEn,
         taxId: '',
-        commercialRegister: company.commercialRegistration,
+        commercialRegister: '',
         vatNumber: '',
-        address: company.address,
-        phone: company.phone,
+        address: '',
+        phone: '',
         currency: company.currency,
         database: 'Server-managed database',
         isDefault: false

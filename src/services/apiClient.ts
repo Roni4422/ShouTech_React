@@ -9,10 +9,6 @@ export interface ApiCompany {
   nameEn: string;
   currency: string;
   language: string;
-  email: string;
-  phone: string;
-  address: string;
-  commercialRegistration: string;
 }
 
 export interface InitialCompanyRequest {
