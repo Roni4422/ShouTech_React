@@ -29,7 +29,10 @@ app.MapGet("/api/companies", async (IDbConnectionFactory db) =>
         await using var connection = await db.OpenConnectionAsync();
         var companies = await connection.QueryAsync<PublicCompany>(
             """
-            SELECT CAST(company_id AS TEXT) AS CompanyId, company_code AS Code, company_name_en AS Name
+            SELECT CAST(company_id AS TEXT) AS CompanyId, company_code AS Code, company_name_ar AS Name, company_name_en AS NameEn,
+                   currency_code AS Currency, language_code AS Language, COALESCE(email, '') AS Email,
+                   COALESCE(phone, '') AS Phone, COALESCE(address_line1, '') AS Address,
+                   COALESCE(commercial_registration, '') AS CommercialRegistration
             FROM companies
             WHERE is_active = @Active AND is_deleted = @Deleted
             ORDER BY company_name_en, company_code
@@ -108,6 +111,7 @@ app.MapPost("/api/auth/login", async (LoginRequest request, HttpContext http, ID
         var user = await connection.QuerySingleOrDefaultAsync<AuthUser>(
             """
             SELECT CAST(u.user_id AS TEXT) AS UserId, CAST(u.company_id AS TEXT) AS CompanyId, u.username AS Username,
+                   u.full_name AS FullName, u.full_name_en AS FullNameEn, COALESCE(u.email, '') AS Email,
                    c.is_active AS CompanyActive, c.is_deleted AS CompanyDeleted,
                    u.is_active AS UserActive, u.is_deleted AS UserDeleted,
                    uc.password_hash AS PasswordHash, uc.failed_attempt_count AS FailedAttempts,
@@ -146,6 +150,31 @@ app.MapPost("/api/auth/login", async (LoginRequest request, HttpContext http, ID
             return Results.Unauthorized();
         }
 
+        var roleCode = await connection.QuerySingleOrDefaultAsync<string>(
+            """
+            SELECT r.role_code FROM user_roles ur
+            INNER JOIN roles r ON r.role_id = ur.role_id
+            WHERE ur.user_id = @UserId AND r.company_id = @CompanyId
+              AND r.is_active = @Active AND r.is_deleted = @Deleted
+            ORDER BY CASE r.role_code WHEN 'ROLE_ADMINISTRATOR' THEN 0 WHEN 'ROLE_USER' THEN 1 ELSE 2 END
+            LIMIT 1
+            """,
+            new { UserId = db.ToIdentifier(user.UserId), CompanyId = db.ToIdentifier(user.CompanyId),
+                Active = db.BooleanParameter(true), Deleted = db.BooleanParameter(false) });
+        if (roleCode is null) return Results.Unauthorized();
+        var permissions = (await connection.QueryAsync<string>(
+            """
+            SELECT DISTINCT p.permission_code FROM user_roles ur
+            INNER JOIN roles r ON r.role_id = ur.role_id
+            INNER JOIN role_permissions rp ON rp.role_id = r.role_id
+            INNER JOIN permissions p ON p.permission_id = rp.permission_id
+            WHERE ur.user_id = @UserId AND r.company_id = @CompanyId
+              AND r.is_active = @Active AND r.is_deleted = @Deleted AND p.is_active = @Active
+            ORDER BY p.permission_code
+            """,
+            new { UserId = db.ToIdentifier(user.UserId), CompanyId = db.ToIdentifier(user.CompanyId),
+                Active = db.BooleanParameter(true), Deleted = db.BooleanParameter(false) })).ToArray();
+
         var tokenBytes = RandomNumberGenerator.GetBytes(32);
         var token = Convert.ToBase64String(tokenBytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
         var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token))).ToLowerInvariant();
@@ -172,7 +201,7 @@ app.MapPost("/api/auth/login", async (LoginRequest request, HttpContext http, ID
             }, transaction);
         await RecordAuthEventAsync(connection, db, user.CompanyId, user.UserId, user.Username, "login_succeeded", http, transaction);
         await transaction.CommitAsync();
-        return Results.Ok(new AuthSessionResponse(token, expiresAt, user.UserId, user.CompanyId, user.Username));
+        return Results.Ok(new AuthSessionResponse(token, expiresAt, user.UserId, user.CompanyId, user.Username, user.FullName, user.FullNameEn, user.Email, roleCode, permissions));
     }
     catch
     {
@@ -261,10 +290,10 @@ public sealed record LoginRequest(string Username, string Password, string Compa
 public sealed record InitialCompanyRequest(string CompanyCode, string CompanyNameAr, string CompanyNameEn,
     string AdminUsername, string AdminPassword, string AdminFullName, string? Email, string? Phone,
     string? Address, string? CommercialRegistration, string? CurrencyCode, string? LanguageCode);
-public sealed record PublicCompany(string CompanyId, string Code, string Name);
-public sealed record AuthSessionResponse(string AccessToken, DateTimeOffset ExpiresAt, string UserId, string CompanyId, string Username);
+public sealed record PublicCompany(string CompanyId, string Code, string Name, string NameEn, string Currency, string Language, string Email, string Phone, string Address, string CommercialRegistration);
+public sealed record AuthSessionResponse(string AccessToken, DateTimeOffset ExpiresAt, string UserId, string CompanyId, string Username, string FullName, string FullNameEn, string Email, string RoleCode, string[] Permissions);
 public sealed record AuthUser(string UserId, string CompanyId, string Username, object CompanyActive, object CompanyDeleted,
-    object UserActive, object UserDeleted, string PasswordHash, int FailedAttempts, object? LockedUntil);
+    object UserActive, object UserDeleted, string PasswordHash, int FailedAttempts, object? LockedUntil, string FullName, string FullNameEn, string Email);
 public sealed record SessionView(string SessionId, string UserId, string CompanyId, string ExpiresAt, string Username);
 )[3];
         await connection.ExecuteAsync(
