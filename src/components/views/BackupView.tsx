@@ -16,9 +16,8 @@ export const BackupView: React.FC = () => {
 
   const [selectedId, setSelectedId] = useState<string>(backups[0]?.id || '');
   const [backupNote, setBackupNote] = useState('نسخة احتياطية مرآة كاملة للشركة وقواعد البيانات');
-  const [targetLocation, setTargetLocation] = useState<'cloud_vault' | 'local' | 'custom_path'>('local');
+  const [targetLocation] = useState<'local'>('local');
   const [customPath, setCustomPath] = useState(currentCompany.backupLocation || 'D:\\ShouTech_Backups\\Vault\\');
-  const [isSyncing, setIsSyncing] = useState(false);
 
   // Filter backups for current company
   const companyBackups = backups.filter(b => !b.companyCode || b.companyCode === currentCompany.code);
@@ -141,14 +140,7 @@ export const BackupView: React.FC = () => {
               <Plus className="w-4 h-4 text-emerald-400" />
               <span>تنزيل لقطة JSON للشركة النشطة</span>
             </span>
-            <button
-              onClick={handleSimulateCloudSync}
-              disabled={isSyncing}
-              className="px-3 py-1 bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/40 text-cyan-300 rounded text-xs flex items-center gap-1 font-mono transition-colors"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span>مزامنة سحابية يدوية</span>
-            </button>
+   </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
