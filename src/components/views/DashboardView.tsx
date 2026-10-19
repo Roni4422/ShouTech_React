@@ -1,8 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
-  TrendingUp, ShoppingCart, Package, Users, AlertTriangle, 
-  ArrowUpRight, ArrowDownRight, Layers, FileText, CheckCircle2 
+  TrendingUp, ShoppingCart, Package, AlertTriangle, Layers, FileText, CheckCircle2 
 } from 'lucide-react';
 
 export const DashboardView: React.FC = () => {
@@ -21,9 +20,10 @@ export const DashboardView: React.FC = () => {
     .reduce((sum, i) => sum + i.grandTotal, 0);
 
   const totalInventoryValue = materials.reduce((sum, m) => sum + (m.qtyOnHand * m.cost), 0);
-  const cashAccount = accounts.find(a => a.code === '111')?.balance || 84500;
-  const bankAccount = accounts.find(a => a.code === '112')?.balance || 142000;
-  const totalLiquidity = cashAccount + bankAccount;
+  const cashAccount = accounts.find(a => a.code === '111')?.balance;
+  const bankAccount = accounts.find(a => a.code === '112')?.balance;
+  const hasLiquidityAccounts = cashAccount !== undefined || bankAccount !== undefined;
+  const totalLiquidity = (cashAccount ?? 0) + (bankAccount ?? 0);
 
   const lowStockItems = materials.filter(m => m.qtyOnHand <= m.reorderQty);
 
@@ -70,11 +70,10 @@ export const DashboardView: React.FC = () => {
           </div>
           <div className="mt-2">
             <div className="text-2xl font-bold text-white">
-              {totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-normal text-gray-400">SAR</span>
+              {postedInvoices.some(i => i.kind === 'sales' || i.kind === 'pos') ? totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'} <span className="text-xs font-normal text-gray-400">SAR</span>
             </div>
             <div className="flex items-center gap-1 text-[11px] text-emerald-400 mt-1">
-              <ArrowUpRight className="w-3.5 h-3.5" />
-              <span>+14.8% vs last month</span>
+              <span>{postedInvoices.some(i => i.kind === 'sales' || i.kind === 'pos') ? 'Based on posted sales records' : 'No posted sales records'}</span>
             </div>
           </div>
         </div>
@@ -89,10 +88,10 @@ export const DashboardView: React.FC = () => {
           </div>
           <div className="mt-2">
             <div className="text-2xl font-bold text-white">
-              {totalPurchases.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-normal text-gray-400">SAR</span>
+              {postedInvoices.some(i => i.kind === 'purchase') ? totalPurchases.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'} <span className="text-xs font-normal text-gray-400">SAR</span>
             </div>
             <div className="flex items-center gap-1 text-[11px] text-blue-400 mt-1">
-              <span>Imported inventory orders</span>
+              <span>{postedInvoices.some(i => i.kind === 'purchase') ? 'Based on posted purchase records' : 'No posted purchase records'}</span>
             </div>
           </div>
         </div>
@@ -107,7 +106,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <div className="mt-2">
             <div className="text-2xl font-bold text-white">
-              {totalInventoryValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-normal text-gray-400">SAR</span>
+              {materials.length > 0 ? totalInventoryValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'} <span className="text-xs font-normal text-gray-400">SAR</span>
             </div>
             <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-1">
               <span>{materials.length} {translate('dashboard.productsCount')}</span>
@@ -125,10 +124,10 @@ export const DashboardView: React.FC = () => {
           </div>
           <div className="mt-2">
             <div className="text-2xl font-bold text-white">
-              {totalLiquidity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-normal text-gray-400">SAR</span>
+              {hasLiquidityAccounts ? totalLiquidity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'} <span className="text-xs font-normal text-gray-400">SAR</span>
             </div>
             <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-1">
-              <span>Safe Cash + Bank Accounts</span>
+              <span>{hasLiquidityAccounts ? 'Based on configured cash/bank accounts' : 'Cash and bank balances unavailable'}</span>
             </div>
           </div>
         </div>
@@ -150,7 +149,7 @@ export const DashboardView: React.FC = () => {
 
           <div className="space-y-2">
             {lowStockItems.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4 text-center">All materials are currently above reorder levels.</p>
+              <p className="text-xs text-gray-400 py-4 text-center">{materials.length === 0 ? 'No inventory records are available.' : 'No materials currently meet the reorder alert criteria.'}</p>
             ) : (
               lowStockItems.map(item => (
                 <div 
