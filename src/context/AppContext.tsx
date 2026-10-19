@@ -314,8 +314,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dongleId: 'Not connected',
     dongleFirmware: 'Not detected',
     donglePrimedForReception: false,
-    dongleListeningPort: 'USB HID \\\\?\\hid#vid_04b9&pid_0300 (Listening...)',
-    licenseServerUrl: 'https://license-vault.shoutech-erp.com:8443/v1',
+    dongleListeningPort: 'Not configured',
+    licenseServerUrl: 'Not configured',
     licenseServerStatus: 'offline_grace_mode',
     serverLeaseDaysRemaining: 0,
     antiTamperActive: false,
@@ -327,7 +327,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     sessionTimeoutMin: 30,
     remoteCloudBackupActive: false,
     cloudBackupsRetainedCount: 0,
-    lastCloudBackupTimestamp: new Date().toISOString()
+    lastCloudBackupTimestamp: undefined
   });
 
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
