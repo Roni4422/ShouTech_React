@@ -25,7 +25,7 @@ export const ReportsView: React.FC = () => {
     const columns = Object.keys(data[0]);
     const escapeCell = (value: string | number | boolean | null | undefined): string => {
       const raw = value == null ? '' : String(value);
-      const formulaSafe = /^[\s]*[=+@-]/.test(raw) ? "'" + raw : raw;
+      const formulaSafe = typeof value === 'string' && /^[\s]*[=+@-]/.test(raw) ? "'" + raw : raw;
       return '"' + formulaSafe.replace(/"/g, '""') + '"';
     };
     const csv = [columns, ...data.map(row => columns.map(column => row[column]))]
@@ -45,7 +45,7 @@ export const ReportsView: React.FC = () => {
       showToast('Export failed: the browser could not start the CSV download.');
     } finally {
       link.remove();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   };
 
