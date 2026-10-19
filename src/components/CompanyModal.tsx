@@ -14,8 +14,8 @@ export const CompanyModal: React.FC = () => {
     addCompany, translate, showToast, lockWorkstation 
   } = useApp();
 
-  const [selectedCompany, setSelectedCompany] = useState<Company>(currentCompany || companies[0]);
-  const [showAddCompany, setShowAddCompany] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(companies[0] || null);
+  const [showAddCompany, setShowAddCompany] = useState(companies.length === 0);
 
   // New company state
   const [newCode, setNewCode] = useState(`00${companies.length + 1}`);
@@ -39,7 +39,7 @@ export const CompanyModal: React.FC = () => {
   if (appStage !== 'company_select') return null;
 
   const handleProceed = () => {
-    if (!selectedCompany) {
+    if (!selectedCompany || !companies.some(company => company.id === selectedCompany.id)) {
       showToast('يرجى اختيار شركة للمتابعة');
       return;
     }
@@ -87,6 +87,7 @@ export const CompanyModal: React.FC = () => {
     };
 
     addCompany(created);
+    setSelectedCompany({ ...created, id: `ST-COMP-${Date.now().toString().slice(-3)}` });
     setShowAddCompany(false);
     showToast(`تم حفظ سجل الشركة محلياً: ${newNameAr.trim()}. لم تُنشأ قاعدة بيانات أو يُستورد دليل الحسابات أو يُفعّل النسخ السحابي.`);
   };
