@@ -1,8 +1,7 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { QuickToolbar } from './components/QuickToolbar';
+import { MenuBar } from './components/MenuBar';
 import { Ribbon } from './components/Ribbon';
-import { MdiTabBar } from './components/MdiTabBar';
 import { StatusBar } from './components/StatusBar';
 import { SplashModal } from './components/SplashModal';
 import { CompanyModal } from './components/CompanyModal';
@@ -88,17 +87,9 @@ const MainShell: React.FC = () => {
 
   return (
     <div className="st-shell flex flex-col h-screen w-screen overflow-hidden">
-      {/* 1. Windows Classic Menu Bar (UIchart.md) */}
-     
-
-      {/* 2. Quick Action Toolbar */}
-      <QuickToolbar />
-
-      {/* 3. Office / Phenix v9 Multi-Ribbon Bar */}
+      {/* Main menu bar and the single Ribbon component. Open-window navigation lives in the View menu. */}
+      <MenuBar />
       <Ribbon />
-
-      {/* 4. MDI Multi-Window Tab Bar */}
-      <MdiTabBar />
 
       {/* 5. Active MDI Module Workspace Area */}
       <main className="st-workspace flex-1 overflow-hidden relative">
