@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { LanguageCode } from '../../types';
+import { ImportedSchemaCatalogView } from './ImportedSchemaCatalogView';
 import { 
   Wrench, Calculator, Keyboard, Settings, Database, 
   Globe, KeyRound, History, Sparkles, Brain, Check, RefreshCw 
@@ -8,7 +9,7 @@ import {
 
 export const ToolsView: React.FC = () => {
   const { language, setLanguage, currentCompany, showToast, createBackup } = useApp();
-  const [activeTab, setActiveTab] = useState<'calc' | 'keyboard' | 'maintenance' | 'langs' | 'password' | 'ai'>('calc');
+  const [activeTab, setActiveTab] = useState<'calc' | 'keyboard' | 'maintenance' | 'langs' | 'password' | 'ai' | 'schema'>('calc');
 
   // Calculator State
   const [calcDisplay, setCalcDisplay] = useState('0');
@@ -85,6 +86,7 @@ export const ToolsView: React.FC = () => {
             { id: 'keyboard', label: 'لوحة المفاتيح الافتراضية' },
             { id: 'langs', label: 'محرك اللغات العشر (10 Langs)' },
             { id: 'maintenance', label: 'معالج صيانة الفهارس' },
+            { id: 'schema', label: 'مخطط قاعدة البيانات' },
             { id: 'ai', label: 'الذكاء الصناعي ومسجل الحركات' },
           ].map(tab => (
             <button
@@ -209,6 +211,8 @@ export const ToolsView: React.FC = () => {
             </div>
           </div>
         )}
+
+        {activeTab === 'schema' && <div className="h-full w-full min-h-0"><ImportedSchemaCatalogView /></div>}
 
         {activeTab === 'maintenance' && (
           <div className="max-w-xl w-full bg-[#252526] border border-[#383838] rounded-2xl p-6 shadow-2xl text-center">
