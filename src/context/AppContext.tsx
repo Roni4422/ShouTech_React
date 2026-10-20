@@ -730,56 +730,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const postJournal = (id: number): boolean => {
     const jrn = journals.find(j => j.id === id);
-    if (!jrn || jrn.status === 'Posted') return false;
-
-    // Validate the actual lines, not the header totals supplied by the editor.
-    const lines = jrn.lines || [];
-    if (lines.length < 2 || lines.some(line =>
-      !line.accountCode ||
-      !Number.isFinite(line.debit) || !Number.isFinite(line.credit) ||
-      line.debit < 0 || line.credit < 0 ||
-      (line.debit > 0 && line.credit > 0) ||
-      (line.debit === 0 && line.credit === 0)
-    )) {
-      showToast('Posting rejected: journal lines are invalid. Correct the lines and try again.');
+    if (!jrn) {
+      showToast('Posting rejected: the journal does not exist in the current session.');
+      return false;
+    }
+    if (jrn.status === 'Posted') {
+      showToast('Posting rejected: this journal is already marked as posted in the current session.');
       return false;
     }
 
-    const totalDebit = lines.reduce((sum, line) => sum + line.debit, 0);
-    const totalCredit = lines.reduce((sum, line) => sum + line.credit, 0);
-    if (totalDebit <= 0 || Math.abs(totalDebit - totalCredit) > 0.000001) {
-      showToast('Posting rejected: journal debits must equal credits.');
-      return false;
-    }
-
-    const accountCodes = new Set(accounts.map(account => account.code));
-    if (lines.some(line => !accountCodes.has(line.accountCode))) {
-      showToast('Posting rejected: one or more accounts do not exist in the current chart.');
-      return false;
-    }
-
-    const deltas = new Map<string, number>();
-    for (const line of lines) {
-      deltas.set(line.accountCode, (deltas.get(line.accountCode) || 0) + line.debit - line.credit);
-    }
-
-    setAccounts(prev => prev.map(account => {
-      const delta = deltas.get(account.code);
-      return delta === undefined ? account : { ...account, balance: (account.balance || 0) + delta };
-    }));
-
-    setJournals(prev => prev.map(j => j.id === id ? {
-      ...j,
-      totalDebit,
-      totalCredit,
-      status: 'Posted',
-      postedBy: currentUser?.username || 'unknown',
-      postedAt: new Date().toISOString()
-    } : j));
-
-    recordAuditEvent('POST_JOURNAL_LEDGER', 'GeneralLedger', jrn.docNo);
-    showLocalOnlyToast(translate('jrn.postJournal') + ': ' + jrn.docNo);
-    return true;
+    // Posting must be an atomic server/database operation. No journal-posting API
+    // exists in the current API client, so never mutate ledger balances or mark
+    // the journal as posted in browser memory.
+    showToast('Journal posting is unavailable: server-side posting and database persistence are not implemented. The journal remains a draft.');
+    return false;
   };
 
   const transferStock = (sourceWhId: number, targetWhId: number, materialCode: string, qty: number, reason: string): boolean => {
