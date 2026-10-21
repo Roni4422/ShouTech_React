@@ -1,0 +1,382 @@
+-- ShouTech ERP projects module schema for SQLite.
+-- Canonical module definitions; core company/security/accounting tables are defined by the base schema.
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS project_portfolios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_portfolios_company_status ON project_portfolios(company_id, status);
+
+CREATE TABLE IF NOT EXISTS projects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    project_code VARCHAR(80) NOT NULL,
+    customer_id BIGINT,
+    manager_id BIGINT,
+    start_date DATE,
+    end_date DATE,
+    budget_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_projects_company_status ON projects(company_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_projects_company_code ON projects(company_id, project_code);
+
+CREATE TABLE IF NOT EXISTS project_members (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_members_company_status ON project_members(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_project_members_parent_line ON project_members(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS project_milestones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_milestones_company_status ON project_milestones(company_id, status);
+
+CREATE TABLE IF NOT EXISTS project_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_tasks_company_status ON project_tasks(company_id, status);
+
+CREATE TABLE IF NOT EXISTS project_task_dependencies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_task_dependencies_company_status ON project_task_dependencies(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_project_task_dependencies_parent_line ON project_task_dependencies(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS project_time_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_time_entries_company_status ON project_time_entries(company_id, status);
+
+CREATE TABLE IF NOT EXISTS project_expense_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_expense_lines_company_status ON project_expense_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_project_expense_lines_parent_line ON project_expense_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS project_budgets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_budgets_company_status ON project_budgets(company_id, status);
+
+CREATE TABLE IF NOT EXISTS project_budget_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_budget_lines_company_status ON project_budget_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_project_budget_lines_parent_line ON project_budget_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS project_invoices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_invoices_company_status ON project_invoices(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_project_invoices_company_date ON project_invoices(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS project_invoice_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_invoice_lines_company_status ON project_invoice_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_project_invoice_lines_parent_line ON project_invoice_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS project_risks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_risks_company_status ON project_risks(company_id, status);
+
+CREATE TABLE IF NOT EXISTS project_issues (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_issues_company_status ON project_issues(company_id, status);
+
+CREATE TABLE IF NOT EXISTS project_deliverables (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_project_deliverables_company_status ON project_deliverables(company_id, status);
