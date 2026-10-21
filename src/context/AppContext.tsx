@@ -170,7 +170,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   clearLegacyBrowserBusinessDataOnce();
   // Config
   const [language, setLanguageState] = useState<LanguageCode>(() => {
-    return (localStorage.getItem('shoutech_lang') as LanguageCode) || 'ar';
+    return (localStorage.getItem('shoutech_lang') as LanguageCode) || 'en';
   });
 
   const [theme, setThemeState] = useState<ThemeMode>(() => {
