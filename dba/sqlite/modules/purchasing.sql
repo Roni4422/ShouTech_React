@@ -1,0 +1,446 @@
+-- ShouTech ERP purchasing module schema for SQLite.
+-- Canonical module definitions; core company/security/accounting tables are defined by the base schema.
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS purchase_requisitions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_requisitions_company_status ON purchase_requisitions(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_requisitions_company_date ON purchase_requisitions(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS purchase_requisition_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_requisition_lines_company_status ON purchase_requisition_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_requisition_lines_parent_line ON purchase_requisition_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS purchase_quotations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_quotations_company_status ON purchase_quotations(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_quotations_company_date ON purchase_quotations(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS purchase_quotation_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_quotation_lines_company_status ON purchase_quotation_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_quotation_lines_parent_line ON purchase_quotation_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS purchase_orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_orders_company_status ON purchase_orders(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_orders_company_date ON purchase_orders(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS purchase_order_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_order_lines_company_status ON purchase_order_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_order_lines_parent_line ON purchase_order_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS purchase_receipts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipts_company_status ON purchase_receipts(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipts_company_date ON purchase_receipts(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS purchase_receipt_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipt_lines_company_status ON purchase_receipt_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_receipt_lines_parent_line ON purchase_receipt_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS purchase_returns (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_returns_company_status ON purchase_returns(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_returns_company_date ON purchase_returns(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS purchase_return_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_return_lines_company_status ON purchase_return_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_return_lines_parent_line ON purchase_return_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS purchase_supplier_prices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_supplier_prices_company_status ON purchase_supplier_prices(company_id, status);
+
+CREATE TABLE IF NOT EXISTS purchase_supplier_price_breaks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_supplier_price_breaks_company_status ON purchase_supplier_price_breaks(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_supplier_price_breaks_parent_line ON purchase_supplier_price_breaks(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS purchase_landed_costs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_landed_costs_company_status ON purchase_landed_costs(company_id, status);
+
+CREATE TABLE IF NOT EXISTS purchase_landed_cost_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_landed_cost_lines_company_status ON purchase_landed_cost_lines(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_landed_cost_lines_parent_line ON purchase_landed_cost_lines(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS purchase_approval_rules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_approval_rules_company_status ON purchase_approval_rules(company_id, status);
+
+CREATE TABLE IF NOT EXISTS purchase_approval_steps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_approval_steps_company_status ON purchase_approval_steps(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_purchase_approval_steps_parent_line ON purchase_approval_steps(parent_id, line_no);
