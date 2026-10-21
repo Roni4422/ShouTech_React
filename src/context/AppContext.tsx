@@ -345,7 +345,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Microsoft Word-like Document & Print Preview
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [previewMeta, setPreviewMeta] = useState<{ title: string; docType: string; data?: any }>({
-    title: 'معاينة المستند',
+    title: 'Document Preview',
     docType: 'general'
   });
 
