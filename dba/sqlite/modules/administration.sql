@@ -1,0 +1,756 @@
+-- ShouTech ERP administration module schema for SQLite.
+-- Canonical module definitions; core company/security/accounting tables are defined by the base schema.
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS admin_api_clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    client_id VARCHAR(160) NOT NULL,
+    client_secret_hash VARCHAR(255) NOT NULL,
+    scopes_json TEXT NOT NULL DEFAULT '{}',
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_api_clients_company_status ON admin_api_clients(company_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_admin_api_clients_id ON admin_api_clients(client_id);
+
+CREATE TABLE IF NOT EXISTS admin_api_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    token_hash VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP,
+    last_used_at TIMESTAMP,
+    revoked_at TIMESTAMP,
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_api_tokens_company_status ON admin_api_tokens(company_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_admin_api_tokens_hash ON admin_api_tokens(token_hash);
+
+CREATE TABLE IF NOT EXISTS admin_webhooks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_webhooks_company_status ON admin_webhooks(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_webhook_deliveries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_webhook_deliveries_company_status ON admin_webhook_deliveries(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_webhook_deliveries_parent_line ON admin_webhook_deliveries(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS admin_notification_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_notification_templates_company_status ON admin_notification_templates(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_notifications_company_status ON admin_notifications(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_user_preferences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_user_preferences_company_status ON admin_user_preferences(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_saved_filters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_saved_filters_company_status ON admin_saved_filters(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_saved_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_saved_reports_company_status ON admin_saved_reports(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_report_schedules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_report_schedules_company_status ON admin_report_schedules(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_report_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_report_runs_company_status ON admin_report_runs(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_report_runs_company_date ON admin_report_runs(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS admin_job_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_job_queue_company_status ON admin_job_queue(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_job_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_job_attempts_company_status ON admin_job_attempts(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_job_attempts_parent_line ON admin_job_attempts(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS admin_feature_flags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_feature_flags_company_status ON admin_feature_flags(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_integration_endpoints (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_integration_endpoints_company_status ON admin_integration_endpoints(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_integration_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_integration_runs_company_status ON admin_integration_runs(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_integration_runs_company_date ON admin_integration_runs(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS admin_data_retention_policies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_data_retention_policies_company_status ON admin_data_retention_policies(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_privacy_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_privacy_requests_company_status ON admin_privacy_requests(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_privacy_requests_company_date ON admin_privacy_requests(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS admin_audit_reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_reviews_company_status ON admin_audit_reviews(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_reviews_company_date ON admin_audit_reviews(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS admin_audit_review_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_review_items_company_status ON admin_audit_review_items(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_review_items_parent_line ON admin_audit_review_items(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS admin_approval_policies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_approval_policies_company_status ON admin_approval_policies(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_approval_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    document_no VARCHAR(100),
+    document_date DATE,
+    due_date DATE,
+    currency_code VARCHAR(3),
+    exchange_rate NUMERIC(20,8) NOT NULL DEFAULT 1,
+    subtotal NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    total_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    reference_type VARCHAR(80),
+    reference_id VARCHAR(100),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_approval_requests_company_status ON admin_approval_requests(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_approval_requests_company_date ON admin_approval_requests(company_id, document_date);
+
+CREATE TABLE IF NOT EXISTS admin_approval_steps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_approval_steps_company_status ON admin_approval_steps(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_approval_steps_parent_line ON admin_approval_steps(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS admin_approval_actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_approval_actions_company_status ON admin_approval_actions(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_approval_actions_parent_line ON admin_approval_actions(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS admin_custom_fields (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_custom_fields_company_status ON admin_custom_fields(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_custom_field_values (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_custom_field_values_company_status ON admin_custom_field_values(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_custom_field_values_parent_line ON admin_custom_field_values(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS admin_number_series (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_number_series_company_status ON admin_number_series(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_localization_overrides (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_localization_overrides_company_status ON admin_localization_overrides(company_id, status);
+
+CREATE TABLE IF NOT EXISTS admin_system_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    parent_id BIGINT,
+    line_no INTEGER NOT NULL DEFAULT 1,
+    item_id BIGINT,
+    item_code VARCHAR(100),
+    item_description VARCHAR(500),
+    quantity NUMERIC(20,6) NOT NULL DEFAULT 0,
+    unit_code VARCHAR(20),
+    unit_price NUMERIC(20,6) NOT NULL DEFAULT 0,
+    discount_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    tax_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
+    line_total NUMERIC(20,6) NOT NULL DEFAULT 0,
+    code VARCHAR(80),
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_system_events_company_status ON admin_system_events(company_id, status);
+CREATE INDEX IF NOT EXISTS idx_admin_system_events_parent_line ON admin_system_events(parent_id, line_no);
+
+CREATE TABLE IF NOT EXISTS admin_error_catalog (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id TEXT NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
+    code VARCHAR(80),
+    external_code VARCHAR(120),
+    email VARCHAR(254),
+    phone VARCHAR(50),
+    effective_from DATE,
+    effective_to DATE,
+    name VARCHAR(250),
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+    description TEXT,
+    attributes_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(128),
+    updated_by VARCHAR(128),
+    row_version INTEGER NOT NULL DEFAULT 1,
+    UNIQUE (company_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_admin_error_catalog_company_status ON admin_error_catalog(company_id, status);
