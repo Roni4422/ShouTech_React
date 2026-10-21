@@ -54,3 +54,15 @@ Use these as design references only. Do not copy code or assume their database e
 ## Sequencing
 
 Complete and review the domain SQL source files first, as requested. Do not expand or finalize migrations until the relational model is reviewed and the SQL files execute successfully on both supported engines. Then reconcile the canonical domain SQL with the migration chain; never blindly run both overlapping definitions.
+
+## Completed review slice: sales SQL
+
+Updated `dba/sqlite/modules/sales.sql` and `dba/postgresql/modules/sales.sql` in the working branch:
+
+- Added company-scoped composite candidate keys to the seven parent entities used by sales detail tables.
+- Added composite foreign keys from quotation, order, shipment, return, price-list, target, and route-stop lines to their parent records, including company identity to prevent cross-company parent links.
+- Added positive line-number checks, non-negative quantity/unit-price/discount checks, and positive exchange-rate checks where those fields exist.
+- Added company-scoped unique indexes for non-null document numbers on quotation, order, shipment, return, promotion, and target documents.
+- Verified by source inspection that both SQL files define the same 18 table names, contain seven parent foreign keys and no Arabic-script characters.
+
+These are static source checks only. The SQL has not yet been executed against SQLite or PostgreSQL; existing databases created from an earlier draft would also need a deliberate migration plan because `CREATE TABLE IF NOT EXISTS` does not retrofit changed constraints.
