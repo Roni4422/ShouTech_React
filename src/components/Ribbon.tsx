@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowRightLeft, BookOpen, Building2, Calculator, ChartNoAxesCombined, ClipboardList, Database, FileText, Factory, HelpCircle, LayoutDashboard, Package, Receipt, ShieldCheck, ShoppingCart, Truck, Users, Wrench, WalletCards, type LucideIcon } from 'lucide-react';
+import { ArrowLeftRight, BookOpen, Building2, Calculator, BarChart3, ClipboardList, Database, FileText, Factory, HelpCircle, LayoutDashboard, Package, Receipt, ShieldCheck, ShoppingCart, Truck, Users, Wrench, FileCheck, type LucideIcon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { NAVIGATION_SECTIONS } from '../navigation/moduleNavigation';
 
 const ICONS: Record<string, LucideIcon> = {
-  file: FileText, warehouses: Package, accounts: BookOpen, vouchers: WalletCards,
+  file: FileText, warehouses: Package, accounts: BookOpen, vouchers: FileCheck,
   invoices: Receipt, pos: ShoppingCart, orders: ClipboardList, customers: Users,
-  representatives: Users, manufacturing: Factory, banks: Building2, reports: ChartNoAxesCombined,
+  representatives: Users, manufacturing: Factory, banks: Building2, reports: BarChart3,
   tools: Wrench, 'other-tools': Calculator, view: LayoutDashboard, exit: ShieldCheck, help: HelpCircle,
 };
 
@@ -55,7 +55,7 @@ export const Ribbon: React.FC = () => {
             <span>{isArabic ? 'النسخ الاحتياطي' : 'Backup'}</span>
           </button>
           <button type="button" onClick={() => openWindow('dataExchange')} className="flex min-w-[72px] flex-col items-center justify-center gap-1 rounded px-2 py-1.5 text-[11px] hover:bg-[var(--surface-light)]">
-            <ArrowRightLeft className="h-5 w-5 text-[var(--primary)]" />
+            <ArrowLeftRight className="h-5 w-5 text-[var(--primary)]" />
             <span>{isArabic ? 'تبادل البيانات' : 'Data exchange'}</span>
           </button>
         </div>
