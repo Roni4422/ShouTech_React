@@ -1,134 +1,65 @@
-import React from 'react';
-import {
-  Activity, ArrowLeftRight, BarChart3, BookOpen, Building2, Calculator,
-  Coins, Cpu, Database, FileCheck, FileText, Factory, Layers, LayoutDashboard,
-  Package, Printer, Receipt, Scale, Settings, ShieldAlert, ShieldCheck, ShoppingCart,
-  Truck, Users, UserCheck, Warehouse, Wrench, ClipboardList, Brain
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRightLeft, BookOpen, Building2, Calculator, ChartNoAxesCombined, ClipboardList, Database, FileText, Factory, HelpCircle, LayoutDashboard, Package, Receipt, ShieldCheck, ShoppingCart, Truck, Users, Wrench, WalletCards, type LucideIcon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { ActiveWindow } from '../types';
+import { NAVIGATION_SECTIONS } from '../navigation/moduleNavigation';
 
-type RibbonItem = {
-  id: ActiveWindow;
-  icon: React.ComponentType<{ className?: string }>;
+const ICONS: Record<string, LucideIcon> = {
+  file: FileText, warehouses: Package, accounts: BookOpen, vouchers: WalletCards,
+  invoices: Receipt, pos: ShoppingCart, orders: ClipboardList, customers: Users,
+  representatives: Users, manufacturing: Factory, banks: Building2, reports: ChartNoAxesCombined,
+  tools: Wrench, 'other-tools': Calculator, view: LayoutDashboard, exit: ShieldCheck, help: HelpCircle,
 };
 
-const items: RibbonItem[] = [
-  { id: 'dashboard', icon: LayoutDashboard },
-  { id: 'pos', icon: ShoppingCart },
-  { id: 'invoices', icon: Receipt },
-  { id: 'materials', icon: Package },
-  { id: 'warehouses', icon: Warehouse },
-  { id: 'coa', icon: BookOpen },
-  { id: 'costCenters', icon: Layers },
-  { id: 'currencies', icon: Coins },
-  { id: 'journals', icon: FileCheck },
-  { id: 'cheques', icon: Calculator },
-  { id: 'closingAccounts', icon: Scale },
-  { id: 'financialAnalysis', icon: Activity },
-  { id: 'orders', icon: ClipboardList },
-  { id: 'crm', icon: Users },
-  { id: 'salesReps', icon: UserCheck },
-  { id: 'manufacturing', icon: Factory },
-  { id: 'banks', icon: Building2 },
-  { id: 'reports', icon: BarChart3 },
-  { id: 'aiEnterprise', icon: Brain },
-  { id: 'securityCenter', icon: ShieldCheck },
-  { id: 'tools', icon: Wrench },
-  { id: 'enterpriseOptions', icon: Building2 },
-  { id: 'delivery', icon: Truck },
-  { id: 'backup', icon: Database },
-  { id: 'dataExchange', icon: ArrowLeftRight },
-  { id: 'settings', icon: Settings },
-  { id: 'users', icon: UserCheck },
-  { id: 'nativeEngine', icon: Cpu },
-  { id: 'license', icon: ShieldAlert },
-  { id: 'about', icon: FileText }
-];
-
-const groups: { label: string; windows: ActiveWindow[] }[] = [
-  { label: 'window.dashboard', windows: ['dashboard', 'reports', 'aiEnterprise'] },
-  { label: 'window.materials', windows: ['materials', 'warehouses', 'delivery', 'manufacturing'] },
-  { label: 'window.invoices', windows: ['invoices', 'pos', 'orders', 'crm', 'salesReps'] },
-  { label: 'window.coa', windows: ['coa', 'costCenters', 'currencies', 'journals', 'cheques', 'banks', 'closingAccounts', 'financialAnalysis'] },
-  { label: 'window.settings', windows: ['users', 'securityCenter', 'settings', 'enterpriseOptions', 'tools', 'nativeEngine', 'license', 'about'] },
-  { label: 'window.backup', windows: ['backup', 'dataExchange'] }
-];
-
 export const Ribbon: React.FC = () => {
-  const { activeWindow, openWindow, translate } = useApp();
-
-  const activeGroup = groups.find(group => group.windows.includes(activeWindow)) ?? groups[0];
-  const commandWindows = activeGroup.windows
-    .filter(id => id !== activeWindow)
-    .slice(0, 5)
-    .map(id => items.find(item => item.id === id))
-    .filter((item): item is RibbonItem => Boolean(item));
+  const { language, activeWindow, openWindow } = useApp();
+  const isArabic = language === 'ar' || language === 'fa' || language === 'ur';
+  const [activeSectionId, setActiveSectionId] = useState('warehouses');
+  const activeSection = NAVIGATION_SECTIONS.find(section => section.id === activeSectionId) ?? NAVIGATION_SECTIONS[1];
 
   return (
-    <div className="st-ribbon border-b select-none shrink-0">
-      <div className="flex items-center gap-1 px-2 pt-1 border-b border-[var(--border-color)] overflow-x-auto">
-        {items.map(item => {
-          const Icon = item.icon;
-          const isActive = activeWindow === item.id;
+    <section className="st-ribbon shrink-0 border-b border-[var(--border-color)] bg-[var(--surface)]" dir={isArabic ? 'rtl' : 'ltr'} aria-label={isArabic ? 'شريط الأوامر' : 'Ribbon'}>
+      <nav className="flex items-stretch gap-0.5 overflow-x-auto border-b border-[var(--border-color)] px-1 pt-1" aria-label={isArabic ? 'أقسام البرنامج' : 'Application sections'}>
+        {NAVIGATION_SECTIONS.map(section => {
+          const Icon = ICONS[section.id] ?? FileText;
+          const selected = section.id === activeSection.id;
           return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => openWindow(item.id)}
-              aria-current={isActive ? 'page' : undefined}
-              title={translate('window.' + item.id)}
-              className={'flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-t transition-colors shrink-0 ' +
-                (isActive
-                  ? 'bg-[var(--surface-light)] text-[var(--text-primary)] border-t-2 border-[var(--primary)] font-semibold'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5')}
-            >
-              <Icon className={'w-3.5 h-3.5 ' + (isActive ? 'text-[var(--primary)]' : 'text-[var(--text-secondary)]')} />
-              <span className="whitespace-nowrap">{translate('window.' + item.id)}</span>
+            <button key={section.id} type="button" onClick={() => setActiveSectionId(section.id)}
+              aria-pressed={selected}
+              className={'flex shrink-0 items-center gap-1.5 rounded-t px-2.5 py-2 text-xs transition-colors ' +
+                (selected ? 'border-t-2 border-[var(--primary)] bg-[var(--surface-light)] font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-light)] hover:text-[var(--text-primary)]')}>
+              <Icon className="h-3.5 w-3.5" />
+              <span>{isArabic ? section.labelAr : section.labelEn}</span>
             </button>
           );
         })}
-      </div>
-
-      <div className="st-ribbon-command-area min-h-20 px-3 py-1 flex items-center gap-3 overflow-x-auto text-xs">
-        <div className="flex items-center gap-2 pe-3 border-e border-[var(--border-color)]">
-          {commandWindows.map(item => {
-            const Icon = item.icon;
+      </nav>
+      <div className="st-ribbon-command-area flex min-h-[82px] items-stretch gap-2 overflow-x-auto px-3 py-2">
+        <div className="flex min-w-0 items-stretch gap-1">
+          {activeSection.commands.map(command => {
+            const Icon = ICONS[activeSection.id] ?? FileText;
+            const label = isArabic ? command.labelAr : command.labelEn;
             return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => openWindow(item.id)}
-                title={translate('window.' + item.id)}
-                className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-[var(--surface-light)] text-[11px] gap-1 min-w-[66px]"
-              >
-                <Icon className="w-5 h-5 text-[var(--primary)]" />
-                <span className="max-w-20 truncate">{translate('window.' + item.id)}</span>
+              <button key={command.id} type="button" onClick={() => openWindow(command.target)}
+                title={label}
+                className={'flex min-w-[82px] max-w-[124px] flex-col items-center justify-center gap-1 rounded px-2 py-1.5 text-center text-[11px] text-[var(--text-primary)] hover:bg-[var(--surface-light)] ' +
+                  (activeWindow === command.target ? 'bg-[var(--surface-light)]' : '')}>
+                <Icon className="h-5 w-5 text-[var(--primary)]" />
+                <span className="line-clamp-2 leading-4">{label}</span>
               </button>
             );
           })}
-          <span className="sr-only">{translate(activeGroup.label)}</span>
         </div>
-
-        <div className="ms-auto flex items-center gap-2 ps-3 border-s border-[var(--border-color)]">
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-[var(--surface-light)] text-[11px] gap-1 min-w-[60px]"
-          >
-            <Printer className="w-4 h-4 text-gray-300" />
-            <span>{translate('ribbon.print')}</span>
+        <div className="ms-auto flex shrink-0 items-center border-s border-[var(--border-color)] ps-2">
+          <button type="button" onClick={() => openWindow('backup')} className="flex min-w-[72px] flex-col items-center justify-center gap-1 rounded px-2 py-1.5 text-[11px] hover:bg-[var(--surface-light)]">
+            <Database className="h-5 w-5 text-[var(--primary)]" />
+            <span>{isArabic ? 'النسخ الاحتياطي' : 'Backup'}</span>
           </button>
-          <button
-            type="button"
-            onClick={() => openWindow('backup')}
-            className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-[var(--surface-light)] text-[11px] gap-1 min-w-[60px]"
-          >
-            <Database className="w-4 h-4 text-[var(--primary)]" />
-            <span>{translate('ribbon.createBackup')}</span>
+          <button type="button" onClick={() => openWindow('dataExchange')} className="flex min-w-[72px] flex-col items-center justify-center gap-1 rounded px-2 py-1.5 text-[11px] hover:bg-[var(--surface-light)]">
+            <ArrowRightLeft className="h-5 w-5 text-[var(--primary)]" />
+            <span>{isArabic ? 'تبادل البيانات' : 'Data exchange'}</span>
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
