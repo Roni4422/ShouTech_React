@@ -16,8 +16,8 @@ export const Ribbon: React.FC = () => {
   const activeSection = NAVIGATION_SECTIONS.find(section => section.id === activeSectionId) ?? NAVIGATION_SECTIONS[1];
 
   return (
-    <section className="st-ribbon shrink-0 border-b border-[var(--border-color)] bg-[var(--surface)]" dir="ltr" aria-label={isArabic ? 'شريط الأوامر' : 'Ribbon'}>
-      <nav className="flex items-stretch gap-0.5 overflow-x-auto border-b border-[var(--border-color)] px-1 pt-1" aria-label={isArabic ? 'أقسام البرنامج' : 'Application sections'}>
+    <section className="st-ribbon shrink-0 border-b border-[var(--border-color)] bg-[var(--surface)]" dir="ltr" aria-label="Ribbon">
+      <nav className="flex items-stretch gap-0.5 overflow-x-auto border-b border-[var(--border-color)] px-1 pt-1" aria-label="Application sections">
         {NAVIGATION_SECTIONS.map(section => {
           const Icon = ICONS[section.id] ?? FileText;
           const selected = section.id === activeSection.id;
