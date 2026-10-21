@@ -8,6 +8,17 @@ This schema borrows concepts, not source code, from ERPNext and Dolibarr:
 
 The migration files in this repository are authoritative for the current database schema. This catalog describes intended responsibilities; a table existing does not mean a UI or service is already integrated with it. Migrations 011 (SQLite) and 013 (PostgreSQL) add database-level same-company guards to core commercial relationships; execute and validate them on real engine instances before production.
 
+## Domain-organized SQL schema files
+
+The reviewable module SQL files are indexed in [MODULE_SQL_INDEX.md](MODULE_SQL_INDEX.md) and grouped by engine:
+
+- SQLite: `dba/sqlite/modules/`
+- PostgreSQL: `dba/postgresql/modules/`
+
+These files add 217 module table definitions per engine across CRM, sales, purchasing, inventory, manufacturing, finance, HR, projects, service management, document management and administration. They depend on the existing core `companies` table. They are not standalone fresh-install scripts and have not yet been executed against real database instances.
+
+**Source-of-truth caution:** module SQL and versioned migration files currently overlap in purpose. Before migration-runner integration, review and reconcile these definitions deliberately; do not blindly execute both sets or treat the module files as already applied. Table presence alone does not imply service/UI integration.
+
 ## Migration files
 
 | Database | Migration | Responsibility |
