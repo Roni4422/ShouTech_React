@@ -11,13 +11,12 @@ const ICONS: Record<string, LucideIcon> = {
 };
 
 export const Ribbon: React.FC = () => {
-  const { language, activeWindow, openWindow } = useApp();
-  const isArabic = language === 'ar' || language === 'fa' || language === 'ur';
+  const { activeWindow, openWindow } = useApp();
   const [activeSectionId, setActiveSectionId] = useState('warehouses');
   const activeSection = NAVIGATION_SECTIONS.find(section => section.id === activeSectionId) ?? NAVIGATION_SECTIONS[1];
 
   return (
-    <section className="st-ribbon shrink-0 border-b border-[var(--border-color)] bg-[var(--surface)]" dir={isArabic ? 'rtl' : 'ltr'} aria-label={isArabic ? 'شريط الأوامر' : 'Ribbon'}>
+    <section className="st-ribbon shrink-0 border-b border-[var(--border-color)] bg-[var(--surface)]" dir="ltr" aria-label={isArabic ? 'شريط الأوامر' : 'Ribbon'}>
       <nav className="flex items-stretch gap-0.5 overflow-x-auto border-b border-[var(--border-color)] px-1 pt-1" aria-label={isArabic ? 'أقسام البرنامج' : 'Application sections'}>
         {NAVIGATION_SECTIONS.map(section => {
           const Icon = ICONS[section.id] ?? FileText;
@@ -28,7 +27,7 @@ export const Ribbon: React.FC = () => {
               className={'flex shrink-0 items-center gap-1.5 rounded-t px-2.5 py-2 text-xs transition-colors ' +
                 (selected ? 'border-t-2 border-[var(--primary)] bg-[var(--surface-light)] font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-light)] hover:text-[var(--text-primary)]')}>
               <Icon className="h-3.5 w-3.5" />
-              <span>{isArabic ? section.labelAr : section.labelEn}</span>
+              <span>{section.label}</span>
             </button>
           );
         })}
@@ -37,7 +36,7 @@ export const Ribbon: React.FC = () => {
         <div className="flex min-w-0 items-stretch gap-1">
           {activeSection.commands.map(command => {
             const Icon = ICONS[activeSection.id] ?? FileText;
-            const label = isArabic ? command.labelAr : command.labelEn;
+            const label = command.label;
             return (
               <button key={command.id} type="button" onClick={() => openWindow(command.target)}
                 title={label}
@@ -52,11 +51,11 @@ export const Ribbon: React.FC = () => {
         <div className="ms-auto flex shrink-0 items-center border-s border-[var(--border-color)] ps-2">
           <button type="button" onClick={() => openWindow('backup')} className="flex min-w-[72px] flex-col items-center justify-center gap-1 rounded px-2 py-1.5 text-[11px] hover:bg-[var(--surface-light)]">
             <Database className="h-5 w-5 text-[var(--primary)]" />
-            <span>{isArabic ? 'النسخ الاحتياطي' : 'Backup'}</span>
+            <span>Backup</span>
           </button>
           <button type="button" onClick={() => openWindow('dataExchange')} className="flex min-w-[72px] flex-col items-center justify-center gap-1 rounded px-2 py-1.5 text-[11px] hover:bg-[var(--surface-light)]">
             <ArrowLeftRight className="h-5 w-5 text-[var(--primary)]" />
-            <span>{isArabic ? 'تبادل البيانات' : 'Data exchange'}</span>
+            <span>Data Exchange</span>
           </button>
         </div>
       </div>
