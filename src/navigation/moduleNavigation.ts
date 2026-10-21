@@ -2,106 +2,140 @@ import { ActiveWindow } from '../types';
 
 export type NavigationCommand = {
   id: string;
-  labelAr: string;
-  labelEn: string;
+  label: string;
   target: ActiveWindow;
 };
 
 export type NavigationSection = {
   id: string;
-  labelAr: string;
-  labelEn: string;
+  label: string;
   commands: NavigationCommand[];
 };
 
-// This catalog deliberately links only to screens that exist in ActiveWindow.
-// It is navigation metadata, not a claim that every listed business workflow is implemented.
+// Navigation metadata points only to existing screen identifiers.
+// A menu entry does not imply that its full business workflow is implemented.
 export const NAVIGATION_SECTIONS: NavigationSection[] = [
-  { id: 'file', labelAr: 'ملف', labelEn: 'File', commands: [
-    { id: 'new', labelAr: 'جديد', labelEn: 'New', target: 'invoices' },
-    { id: 'import', labelAr: 'استيراد بيانات', labelEn: 'Import data', target: 'dataExchange' },
-    { id: 'export', labelAr: 'تصدير بيانات', labelEn: 'Export data', target: 'dataExchange' },
-    { id: 'backup', labelAr: 'النسخ الاحتياطي', labelEn: 'Backup', target: 'backup' },
+  { id: 'file', label: 'File', commands: [
+    { id: 'open', label: 'Open', target: 'invoices' },
+    { id: 'new', label: 'New', target: 'invoices' },
+    { id: 'import', label: 'Import Data', target: 'dataExchange' },
+    { id: 'export', label: 'Export Data', target: 'dataExchange' },
+    { id: 'backup', label: 'Backup', target: 'backup' },
   ]},
-  { id: 'warehouses', labelAr: 'المستودعات', labelEn: 'Inventory', commands: [
-    { id: 'material-card', labelAr: 'بطاقة مادة', labelEn: 'Material card', target: 'materials' },
-    { id: 'warehouse-card', labelAr: 'بطاقة مستودع', labelEn: 'Warehouse card', target: 'warehouses' },
-    { id: 'material-reports', labelAr: 'تقارير المواد', labelEn: 'Inventory reports', target: 'reports' },
-    { id: 'stock-transfer', labelAr: 'نقل حركة مادة', labelEn: 'Stock transfer', target: 'invoices' },
+  { id: 'warehouses', label: 'Inventory', commands: [
+    { id: 'material-card', label: 'Material Card', target: 'materials' },
+    { id: 'item-card', label: 'Item Card', target: 'materials' },
+    { id: 'warehouse-card', label: 'Warehouse Card', target: 'warehouses' },
+    { id: 'material-groups', label: 'Material Groups', target: 'materials' },
+    { id: 'barcode', label: 'Barcode Tools', target: 'materials' },
+    { id: 'price-list', label: 'Price List', target: 'reports' },
+    { id: 'ending-stock', label: 'Ending Inventory', target: 'reports' },
+    { id: 'shortages', label: 'Low Stock', target: 'reports' },
+    { id: 'stock-transfer', label: 'Stock Transfer', target: 'invoices' },
+    { id: 'stock-count', label: 'Stock Count Adjustment', target: 'invoices' },
+    { id: 'material-reports', label: 'Inventory Reports', target: 'reports' },
   ]},
-  { id: 'accounts', labelAr: 'الحسابات', labelEn: 'Accounts', commands: [
-    { id: 'coa', labelAr: 'شجرة الحسابات', labelEn: 'Chart of accounts', target: 'coa' },
-    { id: 'cost-centers', labelAr: 'مراكز الكلفة', labelEn: 'Cost centers', target: 'costCenters' },
-    { id: 'currencies', labelAr: 'العملات', labelEn: 'Currencies', target: 'currencies' },
-    { id: 'ledger-reports', labelAr: 'دفتر الأستاذ والتقارير', labelEn: 'Ledger and reports', target: 'reports' },
-    { id: 'closing', labelAr: 'الحسابات الختامية', labelEn: 'Closing accounts', target: 'closingAccounts' },
-    { id: 'analysis', labelAr: 'تحليل مالي', labelEn: 'Financial analysis', target: 'financialAnalysis' },
+  { id: 'accounts', label: 'Accounts', commands: [
+    { id: 'coa', label: 'Chart of Accounts', target: 'coa' },
+    { id: 'cost-centers', label: 'Cost Centers', target: 'costCenters' },
+    { id: 'currencies', label: 'Currencies', target: 'currencies' },
+    { id: 'general-ledger', label: 'General Ledger', target: 'reports' },
+    { id: 'customer-statement', label: 'Customer Statement', target: 'crm' },
+    { id: 'journal-report', label: 'General Journal', target: 'journals' },
+    { id: 'trial-balance', label: 'Trial Balance', target: 'reports' },
+    { id: 'closing', label: 'Closing Accounts', target: 'closingAccounts' },
+    { id: 'financial-statements', label: 'Financial Statements', target: 'closingAccounts' },
+    { id: 'analysis', label: 'Financial Analysis', target: 'financialAnalysis' },
   ]},
-  { id: 'vouchers', labelAr: 'السندات', labelEn: 'Vouchers', commands: [
-    { id: 'journal', labelAr: 'سند قيد / دفتر اليومية', labelEn: 'Journal entry', target: 'journals' },
-    { id: 'cheques', labelAr: 'الأوراق المالية', labelEn: 'Cheques and securities', target: 'cheques' },
+  { id: 'vouchers', label: 'Vouchers', commands: [
+    { id: 'journal', label: 'Journal Entry', target: 'journals' },
+    { id: 'receipt', label: 'Receipt Voucher', target: 'journals' },
+    { id: 'payment', label: 'Payment Voucher', target: 'journals' },
+    { id: 'cash-journal', label: 'Cash Journal', target: 'journals' },
+    { id: 'cheques', label: 'Cheques and Securities', target: 'cheques' },
   ]},
-  { id: 'invoices', labelAr: 'فواتير', labelEn: 'Invoices', commands: [
-    { id: 'invoice', labelAr: 'فاتورة', labelEn: 'Invoice', target: 'invoices' },
-    { id: 'sales', labelAr: 'المبيعات', labelEn: 'Sales', target: 'invoices' },
-    { id: 'purchases', labelAr: 'المشتريات', labelEn: 'Purchases', target: 'invoices' },
-    { id: 'quotation', labelAr: 'عروض السعر', labelEn: 'Quotations', target: 'invoices' },
+  { id: 'invoices', label: 'Invoices', commands: [
+    { id: 'invoice', label: 'Invoice', target: 'invoices' },
+    { id: 'sales', label: 'Sales Invoices', target: 'invoices' },
+    { id: 'purchases', label: 'Purchase Invoices', target: 'invoices' },
+    { id: 'returns', label: 'Sales and Purchase Returns', target: 'invoices' },
+    { id: 'quotation', label: 'Quotations', target: 'invoices' },
+    { id: 'invoice-search', label: 'Invoice Search', target: 'invoices' },
+    { id: 'invoice-profits', label: 'Invoice Profitability', target: 'reports' },
   ]},
-  { id: 'pos', labelAr: 'نقاط البيع', labelEn: 'Point of sale', commands: [
-    { id: 'pos-terminal', labelAr: 'النقاط', labelEn: 'POS terminals', target: 'pos' },
-    { id: 'pos-reports', labelAr: 'تقارير نقطة بيع', labelEn: 'POS reports', target: 'reports' },
+  { id: 'pos', label: 'Point of Sale', commands: [
+    { id: 'pos-terminal', label: 'POS Terminals', target: 'pos' },
+    { id: 'pos-setup', label: 'POS Setup', target: 'pos' },
+    { id: 'pos-cash-report', label: 'POS Cash Report', target: 'reports' },
+    { id: 'pos-reports', label: 'POS Reports', target: 'reports' },
   ]},
-  { id: 'orders', labelAr: 'طلبيات', labelEn: 'Orders', commands: [
-    { id: 'purchase-orders', labelAr: 'طلبيات الشراء والبيع', labelEn: 'Purchase and sales orders', target: 'orders' },
-    { id: 'order-followup', labelAr: 'متابعة الطلبيات', labelEn: 'Order follow-up', target: 'orders' },
+  { id: 'orders', label: 'Orders', commands: [
+    { id: 'purchase-orders', label: 'Purchase Orders', target: 'orders' },
+    { id: 'sales-orders', label: 'Sales Orders', target: 'orders' },
+    { id: 'order-receipt-delivery', label: 'Order Receipt and Delivery', target: 'orders' },
+    { id: 'order-followup', label: 'Order Follow-up', target: 'orders' },
+    { id: 'order-search', label: 'Order Search', target: 'orders' },
   ]},
-  { id: 'customers', labelAr: 'عملاء', labelEn: 'Customers', commands: [
-    { id: 'customer-cards', labelAr: 'بطاقات العملاء', labelEn: 'Customer cards', target: 'crm' },
-    { id: 'customer-search', labelAr: 'بحث العملاء', labelEn: 'Customer search', target: 'crm' },
-    { id: 'customer-reports', labelAr: 'تقارير العملاء', labelEn: 'Customer reports', target: 'reports' },
+  { id: 'customers', label: 'Customers', commands: [
+    { id: 'customer-cards', label: 'Customer Cards', target: 'crm' },
+    { id: 'customer-prices', label: 'Customer Pricing', target: 'crm' },
+    { id: 'customer-discounts', label: 'Customer Discounts', target: 'crm' },
+    { id: 'customer-search', label: 'Customer Search', target: 'crm' },
+    { id: 'customer-balances', label: 'Customer Balances', target: 'crm' },
+    { id: 'customer-groups', label: 'Customer Groups', target: 'crm' },
+    { id: 'customer-reports', label: 'Customer Reports', target: 'reports' },
   ]},
-  { id: 'representatives', labelAr: 'مندوب', labelEn: 'Sales reps', commands: [
-    { id: 'sales-reps', labelAr: 'بطاقة مندوب', labelEn: 'Sales representative card', target: 'salesReps' },
-    { id: 'rep-reports', labelAr: 'تحصيلات المندوب', labelEn: 'Representative collections', target: 'reports' },
+  { id: 'representatives', label: 'Sales Representatives', commands: [
+    { id: 'sales-reps', label: 'Representative Cards', target: 'salesReps' },
+    { id: 'rep-goals', label: 'Representative Targets', target: 'salesReps' },
+    { id: 'rep-collections', label: 'Representative Collections', target: 'reports' },
+    { id: 'handheld-devices', label: 'Handheld Devices', target: 'salesReps' },
   ]},
-  { id: 'manufacturing', labelAr: 'التصنيع', labelEn: 'Manufacturing', commands: [
-    { id: 'manufacturing-operations', labelAr: 'عمليات التصنيع', labelEn: 'Manufacturing operations', target: 'manufacturing' },
-    { id: 'manufacturing-search', labelAr: 'بحث التصنيع', labelEn: 'Manufacturing search', target: 'manufacturing' },
-    { id: 'manufacturing-costs', labelAr: 'تكاليف المواد المصنعة', labelEn: 'Manufacturing costs', target: 'reports' },
+  { id: 'manufacturing', label: 'Manufacturing', commands: [
+    { id: 'manufacturing-models', label: 'Manufacturing Templates', target: 'manufacturing' },
+    { id: 'manufacturing-operations', label: 'Manufacturing Operations', target: 'manufacturing' },
+    { id: 'manufacturing-search', label: 'Manufacturing Search', target: 'manufacturing' },
+    { id: 'manufacturing-costs', label: 'Manufacturing Cost Analysis', target: 'reports' },
   ]},
-  { id: 'banks', labelAr: 'البنوك', labelEn: 'Banks', commands: [
-    { id: 'bank-cards', labelAr: 'تعريف البنوك', labelEn: 'Bank setup', target: 'banks' },
-    { id: 'bank-reconciliation', labelAr: 'تسوية بنكية', labelEn: 'Bank reconciliation', target: 'banks' },
-    { id: 'bank-balances', labelAr: 'أرصدة البنوك', labelEn: 'Bank balances', target: 'reports' },
+  { id: 'banks', label: 'Banks', commands: [
+    { id: 'bank-cards', label: 'Bank Setup', target: 'banks' },
+    { id: 'bank-reconciliation', label: 'Bank Reconciliation', target: 'banks' },
+    { id: 'bank-balances', label: 'Bank Balances', target: 'reports' },
   ]},
-  { id: 'reports', labelAr: 'تقارير', labelEn: 'Reports', commands: [
-    { id: 'statistics', labelAr: 'إحصائيات', labelEn: 'Statistics', target: 'reports' },
-    { id: 'custom-reports', labelAr: 'تقارير مخصصة', labelEn: 'Custom reports', target: 'reports' },
-    { id: 'dashboard', labelAr: 'لمحة عامة', labelEn: 'Overview', target: 'dashboard' },
+  { id: 'reports', label: 'Reports', commands: [
+    { id: 'statistics', label: 'Statistics', target: 'reports' },
+    { id: 'material-overview', label: 'Material Overview', target: 'reports' },
+    { id: 'customer-overview', label: 'Customer Overview', target: 'reports' },
+    { id: 'custom-reports', label: 'Custom Reports', target: 'reports' },
   ]},
-  { id: 'tools', labelAr: 'أدوات', labelEn: 'Tools', commands: [
-    { id: 'calculator-tools', labelAr: 'الآلة الحاسبة والأدوات', labelEn: 'Calculator and tools', target: 'tools' },
-    { id: 'settings', labelAr: 'خيارات البرنامج', labelEn: 'Program options', target: 'settings' },
-    { id: 'backup-tools', labelAr: 'النسخ الاحتياطي', labelEn: 'Backup', target: 'backup' },
-    { id: 'ai', labelAr: 'الذكاء الصناعي', labelEn: 'AI', target: 'aiEnterprise' },
+  { id: 'tools', label: 'Tools', commands: [
+    { id: 'calculator-tools', label: 'Calculator and Utilities', target: 'tools' },
+    { id: 'settings', label: 'Program Options', target: 'settings' },
+    { id: 'backup-tools', label: 'Backup', target: 'backup' },
+    { id: 'language', label: 'Language Settings', target: 'settings' },
+    { id: 'audit-log', label: 'Activity Log', target: 'tools' },
+    { id: 'ai', label: 'Artificial Intelligence', target: 'aiEnterprise' },
   ]},
-  { id: 'other-tools', labelAr: 'أدوات أخرى', labelEn: 'More tools', commands: [
-    { id: 'permissions', labelAr: 'الصلاحيات والمستخدمون', labelEn: 'Permissions and users', target: 'securityCenter' },
-    { id: 'payment-settings', labelAr: 'طرق الدفع والإعدادات', labelEn: 'Payment methods and settings', target: 'enterpriseOptions' },
-    { id: 'delivery', labelAr: 'التوصيل', labelEn: 'Delivery', target: 'delivery' },
+  { id: 'other-tools', label: 'Additional Tools', commands: [
+    { id: 'permissions', label: 'Permissions and Users', target: 'securityCenter' },
+    { id: 'payment-settings', label: 'Payment Methods and Units', target: 'enterpriseOptions' },
+    { id: 'delivery', label: 'Delivery Management', target: 'delivery' },
   ]},
-  { id: 'view', labelAr: 'عرض', labelEn: 'View', commands: [
-    { id: 'view-coa', labelAr: 'شجرة الحسابات', labelEn: 'Chart of accounts', target: 'coa' },
-    { id: 'view-materials', labelAr: 'شجرة المواد', labelEn: 'Material tree', target: 'materials' },
-    { id: 'company-info', labelAr: 'معلومات الشركة', labelEn: 'Company information', target: 'settings' },
+  { id: 'view', label: 'View', commands: [
+    { id: 'view-coa', label: 'Chart of Accounts', target: 'coa' },
+    { id: 'view-materials', label: 'Material Catalog', target: 'materials' },
+    { id: 'company-info', label: 'Company Information', target: 'settings' },
   ]},
-  { id: 'exit', labelAr: 'خروج', labelEn: 'Exit', commands: [
-    { id: 'switch-company', labelAr: 'تبديل الشركة', labelEn: 'Switch company', target: 'settings' },
-    { id: 'sign-out', labelAr: 'تسجيل الخروج', labelEn: 'Sign out', target: 'settings' },
+  { id: 'exit', label: 'Exit', commands: [
+    { id: 'lock', label: 'Lock Workstation', target: 'securityCenter' },
+    { id: 'switch-company', label: 'Switch Company', target: 'settings' },
+    { id: 'sign-out', label: 'Sign Out', target: 'settings' },
   ]},
-  { id: 'help', labelAr: 'مساعدة', labelEn: 'Help', commands: [
-    { id: 'about', labelAr: 'حول البرنامج', labelEn: 'About', target: 'about' },
-    { id: 'support', labelAr: 'الدعم الفني', labelEn: 'Technical support', target: 'about' },
-    { id: 'license', labelAr: 'تجديد الترخيص', labelEn: 'Renew license', target: 'license' },
+  { id: 'help', label: 'Help', commands: [
+    { id: 'updates', label: 'Check for Updates', target: 'about' },
+    { id: 'instructions', label: 'Program Guide', target: 'about' },
+    { id: 'support', label: 'Technical Support', target: 'about' },
+    { id: 'license', label: 'License', target: 'license' },
+    { id: 'about', label: 'About ShouTech ERP', target: 'about' },
   ]},
 ];
