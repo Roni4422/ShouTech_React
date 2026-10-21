@@ -1,11 +1,15 @@
 # ShouTech ERP — Database Map
 
-The executable database schema is maintained in versioned migrations. This file is the current map; see [SCHEMA_CATALOG.md](SCHEMA_CATALOG.md) for window-to-table mapping, integrity requirements, reference projects and implementation status.
+The current database is described by versioned migrations and domain-organized SQL schema files. The canonical module SQL review set is indexed in [MODULE_SQL_INDEX.md](MODULE_SQL_INDEX.md); these module files have not yet been reconciled into a single authoritative migration source. See [SCHEMA_CATALOG.md](SCHEMA_CATALOG.md) for window-to-table mapping, integrity requirements, reference projects and implementation status.
 
 ## Supported engines
 
-- **SQLite**: `dba/mig/sqlite/`
-- **PostgreSQL**: `dba/mig/postgresql/`
+- **SQLite migrations**: `dba/mig/sqlite/`
+- **PostgreSQL migrations**: `dba/mig/postgresql/`
+- **SQLite domain SQL**: `dba/sqlite/modules/`
+- **PostgreSQL domain SQL**: `dba/postgresql/modules/`
+
+The domain SQL contains 217 additional module table definitions per engine, split into CRM, sales, purchasing, inventory, manufacturing, finance, HR, projects, service, document management and administration. These files depend on the existing core `companies` table and are not standalone fresh-install scripts. Review and reconcile them before treating either set as authoritative.
 
 Keep schema definitions in `dba`. Runtime SQL, transaction orchestration, validation and persistence adapters belong in service/repository code, not in UI components.
 
